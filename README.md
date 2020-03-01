@@ -115,47 +115,51 @@ presented to the host during enumeration.
 
 This is belcarra-2acm+ecm.json file:
 ```
-{ "belcarra": {
-        "bDeviceClass": "0x00",
-        "bDeviceProtocol": "0x00",
-        "bDeviceSubClass": "0x00",
-        "bMaxPacketSize0": "0x40",
+{
+    "belcarra": {
+        "idVendor": "0x15ec",
+        "idProduct": "0xf021",
         "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
         "bcdUSB": "0x0200",
-        "configs": {
-            "Belcarra Composite CDC 2xACM+ECM.1": {
-                "MaxPower": "2",
-                "bmAttributes": "0x80",
-                "functions": [
-                    { "function": "acm.usb0", "name": "acm.GS0" },
-                    { "function": "acm.usb1", "name": "acm.GS1" },
-                    { "function": "ecm.usb0", "name": "ecm.usb0" }
-                ],
-                "strings": { "0x409": { "configuration": "CDC 2xACM+ECM" } }
+        "bMaxPacketSize0": "0x40",
+        "strings": {
+            "0x409": {
+                "manufacturer": "Belcarra Test",
+                "product": "CDC EEM",
+                "serialnumber": "0123456789"
             }
         },
         "functions": {
-            "acm.usb0": {},
-            "acm.usb1": {},
-            "ecm.usb0": {
+            "eem.usb0": {
                 "dev_addr": "4e:28:20:f0:35:ab",
                 "host_addr": "b6:fe:ea:86:2a:50",
                 "qmult": "5"
             }
         },
-        "idProduct": "0xd031",
-        "idVendor": "0x15ec",
+        "configs": {
+            "Belcarra EEM.1": {
+                "bmAttributes": "0x80",
+                "MaxPower": "2",
+                "strings": {
+                    "0x409": {
+                        "configuration": "CDC EEM"
+                    }
+                },
+                "functions": [
+                    {
+                        "name": "eem.usb0",
+                        "function": "eem.usb0"
+                    }
+                ]
+            }
+        },
         "os_desc": {
             "b_vendor_code": "0x00",
             "qw_sign": "",
             "use": "0"
-        },
-        "strings": {
-            "0x409": {
-                "manufacturer": "Belcarra Technologies",
-                "product": "Composite CDC 2xACM+ECM",
-                "serialnumber": "0123456789"
-            }
         }
     }
 }

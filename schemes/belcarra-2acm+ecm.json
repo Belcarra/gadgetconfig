@@ -1,7 +1,7 @@
 {
     "belcarra": {
-        "idVendor": "0x3923",
-        "idProduct": "0x762f",
+        "idVendor": "0x15ec",
+        "idProduct": "0xf021",
         "bcdDevice": "0x0001",
         "bDeviceClass": "0x00",
         "bDeviceSubClass": "0x00",
@@ -10,7 +10,7 @@
         "bMaxPacketSize0": "0x40",
         "strings": {
             "0x409": {
-                "manufacturer": "National Instruments Test",
+                "manufacturer": "Belcarra Test",
                 "product": "CDC EEM",
                 "serialnumber": "0123456789"
             }
@@ -23,7 +23,7 @@
             }
         },
         "configs": {
-            "National Instruments EEM.1": {
+            "Belcarra EEM.1": {
                 "bmAttributes": "0x80",
                 "MaxPower": "2",
                 "strings": {
