@@ -1,0 +1,48 @@
+{
+    "belcarra": {
+        "idVendor": "0x3923",
+        "idProduct": "0x762f",
+        "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
+        "bcdUSB": "0x0200",
+        "bMaxPacketSize0": "0x40",
+        "strings": {
+            "0x409": {
+                "manufacturer": "National Instruments Test",
+                "product": "CDC EEM",
+                "serialnumber": "0123456789"
+            }
+        },
+        "functions": {
+            "eem.usb0": {
+                "dev_addr": "4e:28:20:f0:35:ab",
+                "host_addr": "b6:fe:ea:86:2a:50",
+                "qmult": "5"
+            }
+        },
+        "configs": {
+            "National Instruments EEM.1": {
+                "bmAttributes": "0x80",
+                "MaxPower": "2",
+                "strings": {
+                    "0x409": {
+                        "configuration": "CDC EEM"
+                    }
+                },
+                "functions": [
+                    {
+                        "name": "eem.usb0",
+                        "function": "eem.usb0"
+                    }
+                ]
+            }
+        },
+        "os_desc": {
+            "b_vendor_code": "0x00",
+            "qw_sign": "",
+            "use": "0"
+        }
+    }
+}

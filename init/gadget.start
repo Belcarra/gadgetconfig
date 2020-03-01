@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -x
+
+touch /tmp/GADGET.START
+
+gadgetconfig --remove
+
+MODEL=$(cat /proc/device-tree/model)
+SERIALNUMBER=$(cat /proc/device-tree/serial-number)
+
+if [ -f /etc/gadgetservice/manufacturer.txt ] ;
+        MANUFACTURER="--set-manufacturer $(cat /etc/gadgetservice/manufacturer.txt)"
+
+gadgetconfig "${MANUFACTURER}" --set-product "${MODEL}" --set-serial "${SERIALNUMBER}" --enable-gadget /etc/gadgetservice/schemes/default.scheme
+
+

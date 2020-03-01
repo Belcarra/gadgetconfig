@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# remove the current gadget
+
+set -x
+touch /tmp/GADGET.STOP
+gadget-remove
+
