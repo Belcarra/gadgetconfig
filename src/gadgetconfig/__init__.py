@@ -10,6 +10,7 @@ import os
 import sys
 
 import io
+import re
 #import libconf
 import argparse
 import json
@@ -146,7 +147,10 @@ def main():
 		e = ExportGadget(sys_config_path)
 		devices = e.export_devices()
 		#print("%s" % (json.dumps(devices, sort_keys=True, indent=4)))
-		print("%s" % (json.dumps(devices, indent=4)))
+		# XXX add sed to fix comments
+		#print("%s" % (json.dumps(devices, indent=4)))
+		j = json.dumps(devices, indent=4)
+		print(re.sub(r'"(#.*)":.*,', r'\1', j))
 		exit(0)
 
 	if args.remove is not None:
