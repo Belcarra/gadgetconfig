@@ -171,17 +171,27 @@ This is sample file:
         },
         # Gadget Configurations list
         "configs": {
-            "eem.usb0": {
+            "Belcarra EEM.1": {
                 # Configuration Descriptor
                 # bmAttributes: bit 5 support remote wakeup
                 # bmAttributes: bit 6 self-powered
                 # bmAttributes: bit 7 bus-powered
                 # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
-                "dev_addr": "4e:28:20:f0:35:ab",
-                "host_addr": "b6:fe:ea:86:2a:50",
-                "ifname": "usb0",
-                "qmult": "5",
-                "functions": []
+                "bmAttributes": "0x80",
+                "eem.usb0": "eem.usb0",
+                "MaxPower": "2",
+                "strings": {
+                    # USB Device Configuration Strings
+                    "0x409": {
+                        "configuration": "CDC EEM"
+                    }
+                },
+                "functions": [
+                    {
+                        "name": "eem.usb0",
+                        "function": "eem.usb0"
+                    }
+                ]
             }
         },
         # Microsoft OS Descriptors Support

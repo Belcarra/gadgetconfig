@@ -23,10 +23,16 @@ import commentjson
 #from termcolor import colored
 
 
-from gadgetconfig.add import AddGadget
-from gadgetconfig.export import ExportGadget
-from gadgetconfig.manage import ManageGadget
-from gadgetconfig.remove import RemoveGadget
+try:
+	from gadgetconfig.add import AddGadget
+	from gadgetconfig.export import ExportGadget
+	from gadgetconfig.manage import ManageGadget
+	from gadgetconfig.remove import RemoveGadget
+except ModuleNotFoundError:
+	from add import AddGadget
+	from export import ExportGadget
+	from manage import ManageGadget
+	from remove import RemoveGadget
 
 #from scheme import Scheme
 

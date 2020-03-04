@@ -88,12 +88,12 @@ class ExportGadget(object):
 
 		attributes = [{}, annotation][annotation is not None]
 
-		print("export_attributes: annotation %s" % (annotation), file=sys.stderr)
-		print("export_attributes: attributes %s" % (attributes), file=sys.stderr)
+		# print("export_attributes: annotation %s" % (annotation), file=sys.stderr)
+		# print("export_attributes: attributes %s" % (attributes), file=sys.stderr)
 		attribute_entries = sorted(os.listdir(path), key=str.casefold)
 
 		idList = ['idVendor', 'idProduct', 'bcdDevice', 'bDeviceClass', 'bDeviceSubClass', 'bDeviceProtocol']
-		print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
+		# print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
 
 		if idFlag:
 			for entry in idList:
@@ -107,8 +107,8 @@ class ExportGadget(object):
 			v = self.export_attribute_entry(path, entry, symlinks, exclude)
 			if v is not None:
 				attributes[entry] = v
-		print("export_attributes: %s" % (attributes), file=sys.stderr)
-		print("", file=sys.stderr)
+		# print("export_attributes: %s" % (attributes), file=sys.stderr)
+		# print("", file=sys.stderr)
 		return attributes
 
 	def export_strings(self, strings_path, annotation=None):
@@ -122,13 +122,13 @@ class ExportGadget(object):
 		return strings
 
 	def export_device_configs(self, configs_path):
-		# print("")
-		# print("export_device_configs: configs_path: %s" % (configs_path))
+		print("***********************************")
+		print("export_device_configs: configs_path: %s" % (configs_path))
 		configs = {}
 		for config_name in sorted(os.listdir(configs_path), key=str.casefold):
 			functions = []
-			# print("-------")
-			# print("export_device_configs: config_name: %s" % (config_name))
+			print("-------")
+			print("export_device_configs: config_name: %s" % (config_name))
 			config_path = "%s/%s" % (configs_path, config_name)
 			config_entries = sorted(os.listdir(config_path), key=str.casefold)
 			config = self.export_attributes(config_path, symlinks=True, 
@@ -141,7 +141,7 @@ class ExportGadget(object):
 					})
 			for  entry in config_entries:
 				epath = "%s/%s" % (config_path, entry)
-				# print("export_device_configs: epath: %s" % (epath))
+				print("export_device_configs: epath: %s" % (epath))
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory
 					if entry == 'strings':
@@ -149,7 +149,7 @@ class ExportGadget(object):
 								annotation={'# USB Device Configuration Strings':''})
 					continue
 				elif os.path.islink(epath):
-					# sysmlink - should not be any at this level
+					# symlink - should not be any at this level
 					realpath = os.path.realpath(epath)
 					(path, target) = os.path.split(realpath)
 					functions.append({ 'name': entry, 'function' : target })
@@ -195,8 +195,8 @@ class ExportGadget(object):
 					continue
 				elif os.path.islink(epath):
 					# sysmlink - should not be any at this level
-					#realpath = os.path.realpath(epath)
-					#target = os.path.split(realpath)
+					realpath = os.path.realpath(epath)
+					target = os.path.split(realpath)
 					function[entry] = target
 					continue
 				elif os.path.isfile(epath):
@@ -239,6 +239,7 @@ class ExportGadget(object):
 				device['# Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0'] = ''
 				device['functions'] = self.export_device_functions(epath)
 			if 'configs' in device_entries:
+				epath = "%s/%s" % (device_path, 'configs')
 				device['# Gadget Configurations list'] = ''
 				device['configs'] = self.export_device_configs(epath)
 			for entry in device_entries:
