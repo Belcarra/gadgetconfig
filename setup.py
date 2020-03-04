@@ -18,7 +18,7 @@ def main():
         description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
         entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
         py_modules=['add', 'export', 'manage', 'remove'],
-        install_requires=["argparse"],
+        install_requires=["argparse", "commentjson"],
         classifiers=[
             "Programming Language :: Python",
             "Development Status :: 3 - Alpha",
