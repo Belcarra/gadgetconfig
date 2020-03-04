@@ -1,0 +1,14 @@
+[Unit]
+Description=gadgetservice - start and stop gadget device
+After=network-online.target
+Before=lxd.service
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/gadgetservice/gadget.start
+ExecStop=/usr/lib/gadgetservice/gadget.stop
+
+[Install]
+WantedBy=multi-user.target

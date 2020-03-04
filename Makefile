@@ -15,8 +15,13 @@ bdist:
 	python3 setup.py $@
 sdist:
 	python3 setup.py $@
+#install:
+#	python3 setup.py $@
 install:
-	python3 setup.py $@
+	pip3 install --upgrade .
+uninstall:
+	pip3 uninstall gadgetconfig
+
 twine:
 	twine upload dist/*
 

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -x
+
+touch /tmp/GADGET.START
+
+gadgetconfig --remove Default 
+
+MODEL="$(cat /proc/device-tree/model)"
+SERIALNUMBER="$(cat /proc/device-tree/serial-number)"
+
+echo MODEL: "${MODEL}"
+
+
+if [ -f /etc/gadgetservice/manufacturer.txt ] ; then
+        MANUFACTURER="--manufacturer $(cat /etc/gadgetservice/manufacturer.txt)"
+fi
+
+if [ ! -f /etc/gadgetservice/default.json ] ; then
+        echo "/etc/gadgetservice/default.json does not exist"
+        exit 1
+fi
+
+
+gadgetconfig --name "Default" ${MANUFACTURER} \
+        --product "${MODEL}" --serialnumber "${SERIALNUMBER}" \
+        --add /etc/gadgetservice/default.json #|| exit 1
+
+gadgetconfig --enable "Default"
+

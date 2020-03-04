@@ -2,11 +2,10 @@
 ## Stuart Lynne 
 ## Sun Mar 01 13:36:16 PST 2020 
 
-This package contains tools for configuring Gadget USB Devices.
+This package contains tools for configuring Gadget USB Devices and integrating with *systemd*.
 
 It relies on the Gadget ConfigFS module libcomposite to create and manage Gadget USB Devices.
 
-This package also has *systemd* scripts to start and stop the Gadget Device.
 
 
 ## Gadget USB Device Overview
@@ -33,12 +32,35 @@ Each configuration contains:
 - strings describing the configuration
 
 
+## Systemd Integration
+
+A *gadget.service* file is installed which will use the following to start and stop
+the gadget service:
+
+```
+/usr/lib/gadgetservice/gadget.start
+/usr/lib/gadgetservice/gadget.stop
+```
+
+These rely on a default Gadget Device Definition file being present in:
+
+```
+/etc/gadgetservice/default.json
+```
+
+The service should auto-start when the system is rebooted. The *systemctl* command can also be used;
+
+```
+systemctl start gadget
+systemctl stop gadget
+```
+
+See below for more information on Gadget Device Definition files.
 
 
 ## Gadget USB Device Lifecycle
 
 The *gadgetconfig* program uses USB Device definitions stored in *JSON* files.
-
 
 Gadget Libcomposite:
 

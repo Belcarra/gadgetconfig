@@ -15,18 +15,18 @@ import re
 import argparse
 import json
 import commentjson
-import shutil
+#import shutil
 
-import fnmatch
-import magic
-import struct
-from termcolor import colored
+#import fnmatch
+#import magic
+#import struct
+#from termcolor import colored
 
 
-from add import AddGadget
-from export import ExportGadget
-from manage import ManageGadget
-from remove import RemoveGadget
+from gadgetconfig.add import AddGadget
+from gadgetconfig.export import ExportGadget
+from gadgetconfig.manage import ManageGadget
+from gadgetconfig.remove import RemoveGadget
 
 #from scheme import Scheme
 
@@ -91,7 +91,7 @@ def main():
 	parser.add_argument("--host_addr", type=str, help="Optional ecm host_addr attribute")
 
 	parser.add_argument("-N", "--name", nargs='?', type=str, help='device name override', default=None)
-	parser.add_argument("-I", "--id", nargs='?', type=int, help='enable ID', default=1)
+	#parser.add_argument("-I", "--id", nargs='?', type=int, help='enable ID', default=1)
 	parser.add_argument("-X", "--export", help="Export JSON to STDOUT", action='store_true')
 
 	group = parser.add_mutually_exclusive_group(required=False)
@@ -132,7 +132,7 @@ def main():
 		exit(0)
 
 	if args.enable is not None:
-		m.enable(args.enable)
+		m.enable_current(args.enable)
 		exit(0)
 
 	if args.soft_disconnect:
@@ -172,6 +172,10 @@ def main():
 				if args.serialnumber: replace(device_definition, 'serialnumber', args.serialnumber);
 				if args.dev_addr: replace(device_definition, 'dev_addr', args.dev_addr);
 				if args.host_addr: replace(device_definition, 'host_addr', args.host_addr);
+				print('device_name: %s' % (device_name))
+				if args.name is not None: 
+					device_name = args.name
+					print('device_name: %s' % (device_name))
 				a.add_device_json(device_definition, device_name=device_name)
 
 

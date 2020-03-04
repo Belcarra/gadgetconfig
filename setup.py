@@ -1,23 +1,25 @@
 
-from setuptools import setup, Extension
+from setuptools import setup, find_packages, Extension
 
 
 def main():
 
     setup(
-        name='sysfstree',
-        packages=['sysfstree'],
+        name='gadgetconfig',
+        packages=['gadgetconfig'],
+        #packages=find_packages(),
         package_dir={'': 'src'},
         version=open('VERSION.txt').read().strip(),
         author='Stuart Lynne',
-        author_email='stuart.lynne@gmail.com',
-        url='http://github.com/Belarra/sysfstree',
-        download_url='http://github.com/Belarra/sysfstree.git',
+        author_email='stuart.lynne@belcarra.com',
+        url='http://github.com/Belarra/gadgetconfig',
+        download_url='http://github.com/Belarra/gadgetconfig.git',
         license='MIT',
-        keywords=['configfs', 'sysfs', 'pi', 'usb', 'gadget'],
-        description='sysfstree displayes gadget usb information from the ConfigFS and SysFS',
-        entry_points={'console_scripts': ['sysfstree = sysfstree:main', ], },
-        install_requires=["argparse", "python-magic"],
+        keywords=['usb', 'gadget'],
+        description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
+        entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
+        py_modules=['add', 'export', 'manage', 'remove'],
+        install_requires=["argparse"],
         classifiers=[
             "Programming Language :: Python",
             "Development Status :: 3 - Alpha",
@@ -33,6 +35,13 @@ def main():
             "Topic :: System :: System Shells",
             "Topic :: System :: Systems Administration",
         ],
+        data_files=[
+                ('/etc/gadgetservice', ['definitions/belcarra-2acm+ecm.json']),
+                ('/usr/lib/gadgetservice', ['service/gadget.start','service/gadget.stop']),
+                ('/lib/systemd/system', ['service/gadget.service']),
+                ('/usr/share/doc/gadgetconfig', ['README.md', 'README-Gadget.md', 'README-Raspbian.md']),
+                ],
+                
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown'
 

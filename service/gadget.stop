@@ -4,5 +4,6 @@
 
 set -x
 touch /tmp/GADGET.STOP
-gadget-remove
+gadgetconfig --disable 
+gadgetconfig --remove "Default"
 
