@@ -133,22 +133,30 @@ This file defines a *USB Device* that has:
 - there are attributes for the device 
 ```
 {
-    "belcarra": {
-        "idVendor": "0x15ec",
-        "idProduct": "0xf021",
+    # Gadget Device Definition File
+    # 2020-03-03
+    "Default": {
+        # USB Device Descriptor Fields
+        "idVendor": "0x3923",
+        "idProduct": "0x762f",
         "bcdDevice": "0x0001",
         "bDeviceClass": "0x00",
         "bDeviceSubClass": "0x00",
         "bDeviceProtocol": "0x00",
         "bcdUSB": "0x0200",
         "bMaxPacketSize0": "0x40",
+        # USB Device Strings
         "strings": {
             "0x409": {
                 "manufacturer": "Belcarra Test",
-                "product": "CDC EEM",
-                "serialnumber": "0123456789"
+                "product": "Raspberry Pi 4 Model B Rev 1.1",
+                "serialnumber": "1000000044142478"
             }
         },
+        # Gadget Functions list: see /sys/module/usb_f*,
+        # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+        #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+        # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
         "functions": {
             "eem.usb0": {
                 "dev_addr": "4e:28:20:f0:35:ab",
@@ -156,23 +164,23 @@ This file defines a *USB Device* that has:
                 "qmult": "5"
             }
         },
+        # Gadget Configurations list
         "configs": {
-            "Belcarra EEM.1": {
-                "bmAttributes": "0x80",
-                "MaxPower": "2",
-                "strings": {
-                    "0x409": {
-                        "configuration": "CDC EEM"
-                    }
-                },
-                "functions": [
-                    {
-                        "name": "eem.usb0",
-                        "function": "eem.usb0"
-                    }
-                ]
+            "eem.usb0": {
+                # Configuration Descriptor
+                # bmAttributes: bit 5 support remote wakeup
+                # bmAttributes: bit 6 self-powered
+                # bmAttributes: bit 7 bus-powered
+                # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
+                "dev_addr": "4e:28:20:f0:35:ab",
+                "host_addr": "b6:fe:ea:86:2a:50",
+                "ifname": "usb0",
+                "qmult": "5",
+                "functions": []
             }
         },
+        # Microsoft OS Descriptors Support
+        # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
         "os_desc": {
             "b_vendor_code": "0x00",
             "qw_sign": "",
