@@ -9,21 +9,10 @@
 import os
 import sys
 
-import io
-#import libconf
-#import argparse
-#import json
-#import shutil
-
-#import fnmatch
-#import magic
-#import struct
-#from termcolor import colored
 
 """manage.py: ..."""
 
 # __author__  = "Stuart.Lynne@belcarra.com"
-
 
 
 class ManageGadget(object):
@@ -35,10 +24,9 @@ class ManageGadget(object):
 		self.udclist = []
 		self.configured_device = ''
 
-
 	def pathread(self, path):
 
-		#print("pathread: %s" % (path), file=sys.stderr)
+		# print("pathread: %s" % (path), file=sys.stderr)
 		try:
 			fstat = os.stat(path)
 			# print("fstat: size:%s" % (fstat.st_size), file=sys.stderr)
@@ -62,7 +50,6 @@ class ManageGadget(object):
 				return '[UnicodeDecodeError]'
 
 		return '<UNKNOWN>'
-
 
 	def vprint(self, verbose, s):
 		if verbose:
@@ -105,20 +92,19 @@ class ManageGadget(object):
 		self.vprint(verbose, "")
 		return self.udclist
 
-
 	def check_current(self, verbose=False):
 		dirs = os.listdir(self.configpath)
 		self.vprint(verbose, "Current Gadget configurations")
 		if len(dirs) == 0:
 			self.vprint(verbose, "<NONE>")
 
-		#print("check_current: %s" % (self.configpath))
-		#print("check_current: dirs: %s" % (dirs))
+		# print("check_current: %s" % (self.configpath))
+		# print("check_current: dirs: %s" % (dirs))
 		for d in dirs:
 			udc = self.pathread(("%s/%s/UDC" % (self.configpath, d)))
-			#print("udc: type: %s len: %s" % (type(udc),len(udc)))
+			# print("udc: type: %s len: %s" % (type(udc),len(udc)))
 			if len(udc) == 1 and len(udc[0]) > 1:
-				#print("udc: type: %s len: %s" % (type(udc[0]),len(udc[0])))
+				# print("udc: type: %s len: %s" % (type(udc[0]),len(udc[0])))
 				self.vprint(verbose, "  %s UDC -> %s" % (d, udc[0].rstrip()))
 				self.configured_device = d
 			else:
@@ -133,7 +119,7 @@ class ManageGadget(object):
 		print("Gadget UDC configured to USB Device %s" % (self.device), file=sys.stderr)
 		udcpath = "%s/%s/UDC" % (self.configpath, self.device)
 		print("writing to: %s" % (udcpath), file=sys.stderr)
-		f = open(udcpath, 'w') 
+		f = open(udcpath, 'w')
 		f.write("\n")
 		f.close()
 
@@ -155,8 +141,7 @@ class ManageGadget(object):
 			print("The Gadget UDC is currently configured!")
 			return
 		print("udclist: %s" % (self.udclist), file=sys.stderr)
-		udcpath = self.udclist[0]
-		f = open("/sys/class/udc/%s/soft_connect" % (self.udclist[0]), 'w') 
+		# udcpath = self.udclist[0]
+		f = open("/sys/class/udc/%s/soft_connect" % (self.udclist[0]), 'w')
 		f.write("%s\n" % (['disconnect', 'connect'][flag]))
 		f.close()
-

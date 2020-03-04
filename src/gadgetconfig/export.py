@@ -7,25 +7,13 @@
 #
 
 import os
-import sys
-
-import io
-#import libconf
-#import argparse
-#import json
-#import shutil
 import collections
 from datetime import date
-
 import fnmatch
-#import magic
-#import struct
-#from termcolor import colored
 
 """gadget.py: ..."""
 
 # __author__  = "Stuart.Lynne@belcarra.com"
-
 
 
 class ExportGadget(object):
@@ -37,7 +25,7 @@ class ExportGadget(object):
 
 	def pathread(self, path):
 
-		#print("pathread: %s" % (path))
+		# print("pathread: %s" % (path))
 		try:
 			fstat = os.stat(path)
 			# print("fstat: size:%s" % (fstat.st_size))
@@ -62,8 +50,6 @@ class ExportGadget(object):
 
 		return '<UNKNOWN>'
 
-
-
 	def export_attribute_entry(self, path, entry, symlinks=False, exclude=[]):
 		if any(fnmatch.fnmatch(entry, pattern) for pattern in exclude):
 			return None
@@ -73,7 +59,6 @@ class ExportGadget(object):
 			realpath = os.path.realpath(epath)
 			(head, tail) = os.path.split(realpath)
 			return tail
-			#return None
 		if os.path.isdir(epath) or os.path.islink(epath) or not os.path.isfile(epath):
 			return None
 		return self.pathread(epath)[0].rstrip('\t\r\n\0')
@@ -82,7 +67,6 @@ class ExportGadget(object):
 		if entry not in attributes:
 			return None
 		return self.export_attribute_entry(path, entry)
-
 
 	def export_attributes(self, path, symlinks=False, exclude=[], idFlag=False, annotation=None):
 
@@ -131,28 +115,28 @@ class ExportGadget(object):
 			print("export_device_configs: config_name: %s" % (config_name))
 			config_path = "%s/%s" % (configs_path, config_name)
 			config_entries = sorted(os.listdir(config_path), key=str.casefold)
-			config = self.export_attributes(config_path, symlinks=True, 
+			config = self.export_attributes(config_path, symlinks=True,
 					annotation={
-					    '# Configuration Descriptor':'',
-					    '# bmAttributes: bit 5 support remote wakeup':'',
-					    '# bmAttributes: bit 6 self-powered':'',
-					    '# bmAttributes: bit 7 bus-powered':'',
-					    '# MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set':'',
+						'# Configuration Descriptor': '',
+						'# bmAttributes: bit 5 support remote wakeup': '',
+						'# bmAttributes: bit 6 self-powered': '',
+						'# bmAttributes: bit 7 bus-powered': '',
+						'# MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set': '',
 					})
-			for  entry in config_entries:
+			for entry in config_entries:
 				epath = "%s/%s" % (config_path, entry)
 				print("export_device_configs: epath: %s" % (epath))
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory
 					if entry == 'strings':
-						config[entry] = self.export_strings(epath, 
-								annotation={'# USB Device Configuration Strings':''})
+						config[entry] = self.export_strings(epath,
+								annotation={'# USB Device Configuration Strings': ''})
 					continue
 				elif os.path.islink(epath):
 					# symlink - should not be any at this level
 					realpath = os.path.realpath(epath)
 					(path, target) = os.path.split(realpath)
-					functions.append({ 'name': entry, 'function' : target })
+					functions.append({'name': entry, 'function': target})
 					continue
 				elif os.path.isfile(epath):
 					# should be regular file
@@ -166,7 +150,6 @@ class ExportGadget(object):
 
 		return configs
 
-
 	def export_function_os_desc(self, os_desc_path):
 		# print("")
 		# print("export_function_os_desc: os_desc_path: %s" % (os_desc_path))
@@ -175,7 +158,7 @@ class ExportGadget(object):
 		for entry in os_desc_entries:
 			epath = "%s/%s" % (os_desc_path, entry)
 			if os.path.isdir(epath) and not os.path.islink(epath) and fnmatch.fnmatch(entry, "interface.*"):
-				os_desc[entry] = interface = self.export_attributes(epath)
+				os_desc[entry] = self.export_attributes(epath)
 		return os_desc
 
 	def export_device_functions(self, functions_path, annotation=None):
@@ -185,8 +168,8 @@ class ExportGadget(object):
 		for function_name in sorted(os.listdir(functions_path), key=str.casefold):
 			function_path = "%s/%s" % (functions_path, function_name)
 			function_entries = sorted(os.listdir(function_path), key=str.casefold)
-			function = self.export_attributes(function_path, exclude=['ifname','port_num'])
-			for  entry in function_entries:
+			function = self.export_attributes(function_path, exclude=['ifname', 'port_num'])
+			for entry in function_entries:
 				epath = "%s/%s" % (function_path, entry)
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory
@@ -214,7 +197,6 @@ class ExportGadget(object):
 		# print("export_device_os_desc: os_desc_path: %s" % (os_desc_path))
 		os_desc = self.export_attributes(os_desc_path, symlinks=True)
 		return os_desc
-
 
 	def export_devices(self):
 		device_paths = sorted(os.listdir(self.configpath), key=str.casefold)
@@ -250,29 +232,23 @@ class ExportGadget(object):
 					if entry == 'configs':
 						pass
 					elif entry == 'functions':
-						#device[entry] = self.export_device_functions(epath)
 						pass
 					elif entry == 'os_desc':
 						device['# Microsoft OS Descriptors Support'] = ''
 						device['# C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)'] = ''
 						device[entry] = self.export_device_os_desc(epath)
 					elif entry == 'strings':
-						#device[entry] = self.export_strings(epath)
 						pass
 				elif os.path.islink(epath):
 					# sysmlink - should not be any at this level
 					pass
-				#elif os.path.isfile(epath):
-					#device[entry] = self.pathread(epath)
+				# elif os.path.isfile(epath):
 					# should be regular file
-					continue
+					pass
 				else:
 					# unknown!
 					pass
 
 			devices[device_name] = device
 
-
 		return devices
-
-

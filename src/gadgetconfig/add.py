@@ -7,23 +7,11 @@
 #
 
 import os
-import sys
-
-import io
-#import libconf
-#import argparse
-#import json
-#import shutil
-
 import fnmatch
-#import magic
-#import struct
-#from termcolor import colored
 
 """gadget.py: ..."""
 
 # __author__  = "Stuart.Lynne@belcarra.com"
-
 
 
 class AddGadget(object):
@@ -31,7 +19,7 @@ class AddGadget(object):
 	def __init__(self, configpath, verbose=False):
 		self.configpath = configpath
 		self.verbose = verbose
-		#self.verbose = True
+		# self.verbose = True
 
 	def vprint(self, s):
 		if self.verbose:
@@ -60,7 +48,6 @@ class AddGadget(object):
 		else:
 			return "%s\n" % v
 
-
 	# create_strings
 	# For each language create a stings/lang directory containing
 	# a file for each string descriptor. E.g.
@@ -81,7 +68,7 @@ class AddGadget(object):
 				self.write_str("%s/%s" % (spath, s), "%s\n" % string_dict[s])
 
 	# add_attrs
-	# Add misc attributes to a path, convert ints to hex strings, 
+	# Add misc attributes to a path, convert ints to hex strings,
 	# ignoring dictionary entries with values that are not int or str.
 	#
 	def add_attrs(self, path, dict, exclude=[]):
@@ -92,7 +79,6 @@ class AddGadget(object):
 				continue
 			if isinstance(dict[a], (int, str)):
 				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
-
 
 	# create_device_os_desc
 	# Create the Gadget Device os_descs directory, with symlink to
@@ -125,7 +111,6 @@ class AddGadget(object):
 
 		self.add_attrs(lpath, os_descs_dict, exclude=['config_id', 'config_name'])
 
-
 	# create_functions
 	# Create the Gadget Device Functions
 	def create_functions(self, path, functions_dict):
@@ -146,15 +131,12 @@ class AddGadget(object):
 			self.add_attrs(function_path, function_dict)
 
 			# os_descs is optional, may not be present
-			if not 'os_descs' in function_dict:
+			if 'os_descs' not in function_dict:
 				continue
 			function_os_descs = function_dict['os_descs']
 			for interface in function_os_descs:
 				ipath = "%s/os_desc/%s" % (function_path, interface)
 				print("create_functions: ipath: %s" % (ipath))
-				#self.makedirs(ipath)
-				#self.add_attrs(ipath, function_os_descs[interface])
-
 
 	# create_configs
 	# Create the Gadget Device Configurations
@@ -175,10 +157,6 @@ class AddGadget(object):
 			self.add_attrs(config_path, config_dict)
 			self.create_strings(config_path, config_dict['strings'])
 
-			#for a in config_dict:
-			#	if isinstance(dict[a], (int, str)):
-			#		continue
-
 			# add the function symlinks
 			function_dict = config_dict['functions']
 			for f in function_dict:
@@ -186,7 +164,7 @@ class AddGadget(object):
 				function = f['function']
 				target = "%s/%s" % (config_path, f['name'])
 				src = "%s/functions/%s" % (path, function.replace("_", "."))
-				#target = "%s/%s" % (config_path, f)
+				# target = "%s/%s" % (config_path, f)
 				self.symlink(src, target)
 
 	# add_device_json
@@ -200,11 +178,9 @@ class AddGadget(object):
 		# or int, not a dict
 		self.add_attrs(device_path, device_definition)
 
-		# add the strings, functions, configs and os_desc 
+		# add the strings, functions, configs and os_desc
 		#
 		self.create_strings(device_path, device_definition['strings'])
 		self.create_functions(device_path, device_definition['functions'])
 		self.create_configs(device_path, device_definition['configs'])
 		self.create_device_os_desc(device_path, device_definition)
-
-

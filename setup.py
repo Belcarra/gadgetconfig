@@ -1,5 +1,5 @@
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup
 
 
 def main():
@@ -7,7 +7,6 @@ def main():
     setup(
         name='gadgetconfig',
         packages=['gadgetconfig'],
-        #packages=find_packages(),
         package_dir={'': 'src'},
         version=open('VERSION.txt').read().strip(),
         author='Stuart Lynne',
@@ -36,12 +35,11 @@ def main():
             "Topic :: System :: Systems Administration",
         ],
         data_files=[
-                ('/etc/gadgetservice', ['definitions/belcarra-2acm+ecm.json']),
-                ('/usr/lib/gadgetservice', ['service/gadget.start','service/gadget.stop']),
-                ('/lib/systemd/system', ['service/gadget.service']),
-                ('/usr/share/doc/gadgetconfig', ['README.md', 'README-Gadget.md', 'README-Raspbian.md']),
-                ],
-                
+            ('/etc/gadgetservice', ['definitions/belcarra-2acm+ecm.json']),
+            ('/usr/lib/gadgetservice', ['service/gadget.start', 'service/gadget.stop']),
+            ('/lib/systemd/system', ['service/gadget.service']),
+            ('/usr/share/doc/gadgetconfig', ['README.md', 'README-Gadget.md', 'README-Raspbian.md']), ],
+
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown'
 

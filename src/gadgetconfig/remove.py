@@ -7,23 +7,10 @@
 #
 
 import os
-import sys
-
-import io
-#import libconf
-#import argparse
-#import json
-#import shutil
-
-#import fnmatch
-#import magic
-#import struct
-#from termcolor import colored
 
 """remove.py: ..."""
 
 # __author__  = "Stuart.Lynne@belcarra.com"
-
 
 
 class RemoveGadget(object):
@@ -32,29 +19,26 @@ class RemoveGadget(object):
 		self.configpath = configpath
 		self.device = None
 
-
-	def rmdir(self,path):
+	def rmdir(self, path):
 		if not os.path.isdir(path):
 			print("rmdir: %s NOT A DIR" % (path))
 			return
 		print("rmdir: %s" % (path))
 		os.rmdir(path)
 
-	def unlink(self,path):
+	def unlink(self, path):
 		if not os.path.islink(path):
 			print("rmdir: %s NOT A SYMLINK" % (path))
 			return
 		print("unlink: %s" % (path))
 		os.unlink(path)
 
-	def listdir(self,path):
+	def listdir(self, path):
 		if not os.path.isdir(path):
 			print("listdir: %s NOT A DIR" % (path))
 			return
 		print("listdir: %s" % (path))
 		return os.listdir(path)
-
-
 
 	def remove_strings(self, path):
 		spath = "%s/strings" % path
@@ -102,7 +86,7 @@ class RemoveGadget(object):
 			print("remove_device: config: %s" % (c))
 
 			# 1.
-			config_path = "%s/%s" % ( configs_path, c)
+			config_path = "%s/%s" % (configs_path, c)
 			for e in self.listdir(config_path):
 				self.unlink("%s/%s" % (config_path, e))
 			# 2.
@@ -110,9 +94,8 @@ class RemoveGadget(object):
 			# 3.
 			self.rmdir(config_path)
 
-
 		# iterate across device path / functions so we can
-		# perform step #4, rmdir each 
+		# perform step #4, rmdir each
 		functions_path = "%s/functions" % (device_path)
 		for f in self.listdir(functions_path):
 			# 4.
@@ -124,4 +107,3 @@ class RemoveGadget(object):
 		self.remove_strings(device_path)
 		# 6.
 		self.rmdir(device_path)
-

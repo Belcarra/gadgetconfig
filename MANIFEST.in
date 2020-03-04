@@ -1,0 +1,6 @@
+include README.md
+include README-Gadget.md
+include README-Raspbian.md
+include VERSION.txt
+include LICENSE
+recursive-include src/gadgetconfig *
