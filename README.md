@@ -7,13 +7,28 @@ This package contains tools for configuring Gadget USB Devices and integrating w
 It relies on the Gadget ConfigFS module libcomposite to create and manage Gadget USB Devices.
 
 
+## Installation
+
+To install:
+```
+    pip3 install --no-binary :all: gadgetconfig
+```
+
+To uninstall:
+```
+    pip3 uninstall gadgetconfig
+```
+
+N.B. --no-binary is needed with recent versions of pip to cope with a bug.
+C.f.  https://stackoverflow.com/questions/40588634/how-to-install-data-files-to-absolute-path
+
 
 ## Gadget USB Device Overview
 
 The Gadget USB Device implementation has three layers when using the new libcomposite
 driver:
 
-- Function Drivers, e.g. usb_f_acm, usb_f_ecm, usb_f_eem
+- Function Drivers, e.g. usb\_f\_acm, usb\_f\_ecm, usb\_f_\eem
 - LibComposite, for selecting and configuring the device to use the Function Drivers
 - UDC, to connect the Function Drivers to the underlying USB Device Controller hardware
 

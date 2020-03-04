@@ -17,7 +17,6 @@ def main():
         keywords=['usb', 'gadget'],
         description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
         entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
-        py_modules=['add', 'export', 'manage', 'remove'],
         install_requires=["argparse", "commentjson"],
         classifiers=[
             "Programming Language :: Python",
@@ -34,6 +33,7 @@ def main():
             "Topic :: System :: System Shells",
             "Topic :: System :: Systems Administration",
         ],
+        include_package_data=True,
         data_files=[
             ('/etc/gadgetservice', ['definitions/belcarra-2acm+ecm.json']),
             ('/usr/lib/gadgetservice', ['service/gadget.start', 'service/gadget.stop']),

@@ -18,7 +18,7 @@ sdist:
 #install:
 #	python3 setup.py $@
 install:
-	pip3 install --upgrade .
+	pip3 install --no-binary :all: --upgrade .
 uninstall:
 	pip3 uninstall gadgetconfig
 
