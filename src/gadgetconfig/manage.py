@@ -272,6 +272,13 @@ class ManageGadget(object):
 	def check_device_name(self, device_name):
 		return device_name in self.query_gadgets()
 
+	def replace(self, data, match, repl):
+		if isinstance(data, (dict, list)):
+			for k, v in (data.items() if isinstance(data, dict) else enumerate(data)):
+				if k == match:
+					data[k] = repl
+				self.replace(v, match, repl)
+
 	def add_device_file(self, pathname, new_device_name=None, args=None):
 		print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
 		a = AddGadget(self.configpath)
@@ -289,13 +296,13 @@ class ManageGadget(object):
 					continue
 
 				if args is not None:
-					if args.idVendor: replace(device_definition, 'idVendor', args.idVendor)
-					if args.idProduct: replace(device_definition, 'idProduct', args.idProduct)
-					if args.manufacturer: replace(device_definition, 'manufacturer', args.manufacturer)
-					if args.product: replace(device_definition, 'product', args.product)
-					if args.serialnumber: replace(device_definition, 'serialnumber', args.serialnumber)
-					if args.dev_addr: replace(device_definition, 'dev_addr', args.dev_addr)
-					if args.host_addr: replace(device_definition, 'host_addr', args.host_addr)
+					if args.idVendor: self.replace(device_definition, 'idVendor', args.idVendor)
+					if args.idProduct: self.replace(device_definition, 'idProduct', args.idProduct)
+					if args.manufacturer: self.replace(device_definition, 'manufacturer', args.manufacturer)
+					if args.product: self.replace(device_definition, 'product', args.product)
+					if args.serialnumber: self.replace(device_definition, 'serialnumber', args.serialnumber)
+					if args.dev_addr: self.replace(device_definition, 'dev_addr', args.dev_addr)
+					if args.host_addr: self.replace(device_definition, 'host_addr', args.host_addr)
 
 				a.add_device_json(device_definition, device_name=device_name)
 

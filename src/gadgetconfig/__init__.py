@@ -48,12 +48,12 @@ def remove_old_device(self, configname):
 	exit(1)
 
 
-def replace(data, match, repl):
-	if isinstance(data, (dict, list)):
-		for k, v in (data.items() if isinstance(data, dict) else enumerate(data)):
-			if k == match:
-				data[k] = repl
-			replace(v, match, repl)
+# def replace(data, match, repl):
+# 	if isinstance(data, (dict, list)):
+# 		for k, v in (data.items() if isinstance(data, dict) else enumerate(data)):
+# 			if k == match:
+# 				data[k] = repl
+# 			replace(v, match, repl)
 
 
 # this is mainly for testing standalone
