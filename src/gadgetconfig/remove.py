@@ -70,7 +70,7 @@ class RemoveGadget(object):
 		# sanity checks, verify usb_gadget/configname exists and we have permissions
 		device_path = "%s/%s" % (self.configpath, configname)
 		try:
-			fstat = os.stat(device_path, follow_symlinks=False)
+			os.stat(device_path, follow_symlinks=False)
 		except (FileNotFoundError):
 			print("%s FILE NOT FOUND ERROR" % (device_path))
 			exit(1)

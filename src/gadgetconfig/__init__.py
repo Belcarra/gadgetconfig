@@ -9,18 +9,18 @@
 import os
 import sys
 
-import io
+# import io
 import re
 import argparse
 import json
 
 try:
-	from gadgetconfig.add import AddGadget
+	# from gadgetconfig.add import AddGadget
 	from gadgetconfig.export import ExportGadget
 	from gadgetconfig.manage import ManageGadget
 	from gadgetconfig.remove import RemoveGadget
 except ModuleNotFoundError:
-	from add import AddGadget
+	# from add import AddGadget
 	from export import ExportGadget
 	from manage import ManageGadget
 	from remove import RemoveGadget
@@ -73,7 +73,6 @@ def main():
 	# parser.add_argument("-2", "--scheme2json", help="Scheme Attr to JSON", action='store_true')
 	# parser.add_argument("-S", "--scheme", help="Scheme Attr to JSON", action='store_true')
 
-
 	group = parser.add_mutually_exclusive_group(required=False)
 
 	group.add_argument("--export", help="Export JSON to STDOUT", action='store_true')
@@ -109,7 +108,6 @@ def main():
 	# parser.add_argument("-I", "--id", nargs='?', type=int, help='enable ID', default=1)
 	parser.add_argument("--test", action='store_true')
 
-
 	args = parser.parse_args()
 
 	print("args: %s" % (args), file=sys.stderr)
@@ -127,9 +125,9 @@ def main():
 	if args.query_gadgets:
 		print("Currently defined gadgets: %s" % (m.query_gadgets()))
 		exit(0)
-	#if args.query_soft_connect:
-	#	print("Soft-Connect: %s" % (m.query_soft_connect()))
-	#	exit(0)
+	# if args.query_soft_connect:
+	# 	print("Soft-Connect: %s" % (m.query_soft_connect()))
+	# 	exit(0)
 	if args.query_udc:
 		print("UDC State: %s" % (m.query_udc_state()))
 		print("UDC Function: %s" % (m.query_udc_function()))
@@ -180,24 +178,7 @@ def main():
 		exit(0)
 
 	if args.add is not None:
-		#a = AddGadget(sys_config_path)
 		m.add_device_file(args.add, new_device_name=args.name, args=args)
-		#with io.open(args.add) as f:
-		#	device_definitions = commentjson.load(f)
-		#	for device_name in device_definitions:
-		#		device_definition = device_definitions[device_name]
-		#		if args.idVendor: replace(device_definition, 'idVendor', args.idVendor)
-		#		if args.idProduct: replace(device_definition, 'idProduct', args.idProduct)
-		#		if args.manufacturer: replace(device_definition, 'manufacturer', args.manufacturer)
-		#		if args.product: replace(device_definition, 'product', args.product)
-		#		if args.serialnumber: replace(device_definition, 'serialnumber', args.serialnumber)
-		#		if args.dev_addr: replace(device_definition, 'dev_addr', args.dev_addr)
-		#		if args.host_addr: replace(device_definition, 'host_addr', args.host_addr)
-		#		print('device_name: %s' % (device_name))
-		#		if args.name is not None:
-		#			device_name = args.name
-		#			print('device_name: %s' % (device_name))
-		#		a.add_device_json(device_definition, device_name=device_name)
 
 	exit(1)
 

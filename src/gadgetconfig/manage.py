@@ -40,7 +40,6 @@ class ManageGadget(object):
 		# print("pathread: %s" % (path), file=sys.stderr)
 		try:
 			fstat = os.stat(path)
-			# print("fstat: size:%s" % (fstat.st_size), file=sys.stderr)
 		except (PermissionError):
 			print("pathread: %s PERMISSION ERROR" % (path), file=sys.stderr)
 			return ''
@@ -104,8 +103,6 @@ class ManageGadget(object):
 				self.vprint(verbose, "  %s <UNKNOWN>" % (l))
 		self.vprint(verbose, "")
 		return self.udclist
-
-
 
 	def _query_gadget(self, all=False):
 		gadgets = []

@@ -30,10 +30,10 @@ twine-test:
 
 
 flake8a:
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 . --count --select=E9,F63,F7,F82,W391 --show-source --statistics
 
 flake8b:
-	flake8 . --ignore=C901,E701,E117,W191,E128 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 . --ignore=C901,E701,E117,E265,W191,W391,E128 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
 doctest:
 	python3 -m doctest src/sysfstree/__init__.py -v
