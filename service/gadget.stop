@@ -1,9 +1,11 @@
 #!/bin/sh
+# Copyright (c) 2020 stuart.lynne@belcarra.com
+# /usr/lib/gadgetservice/gadget.stop
 #
 # remove the current gadget
 
 set -x
 touch /tmp/GADGET.STOP
 gadgetconfig --disable 
-gadgetconfig --remove "Default"
+gadgetconfig --remove "System Default"
 

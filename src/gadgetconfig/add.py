@@ -184,3 +184,4 @@ class AddGadget(object):
 		self.create_functions(device_path, device_definition['functions'])
 		self.create_configs(device_path, device_definition['configs'])
 		self.create_device_os_desc(device_path, device_definition)
+

@@ -1,10 +1,11 @@
 #!/bin/bash
-
+# Copyright (c) 2020 stuart.lynne@belcarra.com
+# /usr/lib/gadgetservice/gadget.start
 set -x
 
 touch /tmp/GADGET.START
 
-gadgetconfig --remove Default 
+gadgetconfig --remove "System Default"
 
 MODEL="$(cat /proc/device-tree/model)"
 SERIALNUMBER="$(cat /proc/device-tree/serial-number)"
@@ -22,9 +23,9 @@ if [ ! -f /etc/gadgetservice/default.json ] ; then
 fi
 
 
-gadgetconfig --name "Default" ${MANUFACTURER} \
+gadgetconfig --name "System Default" ${MANUFACTURER} \
         --product "${MODEL}" --serialnumber "${SERIALNUMBER}" \
         --add /etc/gadgetservice/default.json #|| exit 1
 
-gadgetconfig --enable "Default"
+gadgetconfig --enable "System Default"
 
