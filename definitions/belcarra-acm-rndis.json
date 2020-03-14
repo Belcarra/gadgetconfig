@@ -1,0 +1,80 @@
+# Gadget Device Definition File
+# 2020-03-14
+{
+    "belcarra-acm-rndis": {
+        # USB Device Descriptor Fields
+        "idVendor": "0x15ec",
+        "idProduct": "0xf021",
+        "bcdDevice": "0x0100",
+        "bDeviceClass": "0xef",
+        "bDeviceSubClass": "0x02",
+        "bDeviceProtocol": "0x01",
+        "bcdUSB": "0x0200",
+        "bMaxPacketSize0": "0x40",
+        # USB Device Strings
+        "strings": {
+            "0x409": {
+                "manufacturer": "Belcarra Technologies Corp",
+                "product": "ACM-RNDIS Test",
+                "serialnumber": "0123456789"
+            }
+        },
+        # Gadget Functions list: see /sys/module/usb_f*,
+        # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+        #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+        # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
+        "functions": {
+            "acm.GS0": {},
+            "rndis.usb0": {
+                "class": "02",
+                "dev_addr": "1a:55:89:a2:69:41",
+                "host_addr": "1a:55:89:a2:69:42",
+                "protocol": "00",
+                "qmult": "5",
+                "subclass": "06",
+                "os_desc": {
+                    "interface.rndis": {
+                        "compatible_id": "",
+                        "sub_compatible_id": ""
+                    }
+                }
+            }
+        },
+        # Gadget Configurations list
+        "configs": {
+            "config.1": {
+                # Configuration Descriptor
+                # bmAttributes: bit 5 support remote wakeup
+                # bmAttributes: bit 6 self-powered
+                # bmAttributes: bit 7 bus-powered
+                # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
+                "bmAttributes": "0x80",
+                "MaxPower": "244",
+                "strings": {
+                    # USB Device Configuration Strings
+                    "0x409": {
+                        "configuration": "Config 1"
+                    }
+                },
+                "functions": [
+                    {
+                        "name": "acm.GS0",
+                        "function": "acm.GS0"
+                    },
+                    {
+                        "name": "rndis.usb0",
+                        "function": "rndis.usb0"
+                    }
+                ]
+            }
+        },
+        # Microsoft OS Descriptors Support
+        # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
+        "os_desc": {
+            "b_vendor_code": "0x00",
+            "qw_sign": "",
+            "use": "0"
+        }
+    }
+}
+# vim: syntax=off
