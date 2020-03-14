@@ -15,9 +15,9 @@ import os
 
 class RemoveGadget(object):
 
-	def __init__(self, configpath):
+	def __init__(self, configpath, manage):
 		self.configpath = configpath
-		self.device = None
+		self.m = manage
 
 	def rmdir(self, path):
 		if not os.path.isdir(path):
@@ -63,7 +63,14 @@ class RemoveGadget(object):
 	def remove_device(self, configname):
 
 		# sanity checks, verify device is not currently enabled
-		if configname == self.device:
+		#if configname == self.device:
+		#	print("The %s Gadget USB Device is currently enabled!" % (configname))
+		#	exit(1)
+		#if self.query_udc_state() == "not attached":
+		#	print("disable_current: UDC not attached!")
+		#	return False
+		print("remove_device: %s %s" % (configname, self.m.query_gadget()))
+		if configname == self.m.query_gadget():
 			print("The %s Gadget USB Device is currently enabled!" % (configname))
 			exit(1)
 
@@ -100,10 +107,13 @@ class RemoveGadget(object):
 		for f in self.listdir(functions_path):
 			# 4.
 			self.rmdir("%s/%s" % (functions_path, f))
+			print("AAAA")
+		print("BBBB")
 
 		# Finally for device path, do step #5 remove strings and then step #6 remove the device
 		#
 		# 5.
 		self.remove_strings(device_path)
+		print("CCCC")
 		# 6.
 		self.rmdir(device_path)

@@ -200,3 +200,22 @@ This file defines a *USB Device* that has:
 }
 
 ```
+
+
+## Definition file annotations 
+
+The export command will produce JSON files that have annotations to help aid understanding them.
+
+E.g.
+```
+       },
+       # Gadget Functions list: see /sys/module/usb_f*,
+       # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+       #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+       # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
+       "functions": {
+```
+
+These are removed before input via the add command.
+
+

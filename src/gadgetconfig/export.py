@@ -5,10 +5,30 @@
 
 # gadgetconfig configures and enables a Gadget USB configuration
 #
+# N.B. annotations are supported by adding comments attributes:
+#
+# E.g.
+#	device['# Gadget Functions list: see /sys/module/usb_f*,'] = ''
+#	device['# E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage'] = ''
+#	device['#       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial'] = ''
+#	device['# Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0'] = ''
+#	device['functions'] = self.export_device_functions(epath)
+#
+# These will be translated on output to a comment in the JSON file
+#
+#        },
+#        # Gadget Functions list: see /sys/module/usb_f*,
+#        # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+#        #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+#        # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
+#        "functions": {
+#
+# And removed before input via the add command.
+#
 
 import os
+import sys
 import collections
-from datetime import date
 import fnmatch
 
 """gadget.py: ..."""
@@ -25,15 +45,15 @@ class ExportGadget(object):
 
 	def pathread(self, path):
 
-		# print("pathread: %s" % (path))
+		# print("pathread: %s" % (path), file=sys.stderr)
 		try:
 			fstat = os.stat(path)
-			# print("fstat: size:%s" % (fstat.st_size))
+			# print("fstat: size:%s" % (fstat.st_size), file=sys.stderr)
 		except (PermissionError):
-			print("pathread: %s PERMISSION ERROR" % (path))
+			print("pathread: %s PERMISSION ERROR" % (path), file=sys.stderr)
 			return ''
 		except (FileNotFoundError):
-			print("pathread: %s NOT FOUND" % (path))
+			print("pathread: %s NOT FOUND" % (path), file=sys.stderr)
 			return ''
 
 		# 4096 or 0 byte files should contain info
@@ -53,7 +73,7 @@ class ExportGadget(object):
 	def export_attribute_entry(self, path, entry, symlinks=False, exclude=[]):
 		if any(fnmatch.fnmatch(entry, pattern) for pattern in exclude):
 			return None
-		# print("export_attributes: entry %s" % (entry))
+		# print("export_attributes: entry %s" % (entry), file=sys.stderr)
 		epath = "%s/%s" % (path, entry)
 		if symlinks and os.path.islink(epath):
 			realpath = os.path.realpath(epath)
@@ -106,16 +126,16 @@ class ExportGadget(object):
 		return strings
 
 	def export_device_configs(self, configs_path):
-		print("***********************************")
-		print("export_device_configs: configs_path: %s" % (configs_path))
+		print("***********************************", file=sys.stderr)
+		print("export_device_configs: configs_path: %s" % (configs_path), file=sys.stderr)
 		configs = {}
 		for config_name in sorted(os.listdir(configs_path), key=str.casefold):
 			functions = []
-			print("-------")
-			print("export_device_configs: config_name: %s" % (config_name))
+			print("-------", file=sys.stderr)
+			print("export_device_configs: config_name: %s" % (config_name), file=sys.stderr)
 			config_path = "%s/%s" % (configs_path, config_name)
 			config_entries = sorted(os.listdir(config_path), key=str.casefold)
-			config = self.export_attributes(config_path, symlinks=True,
+			config = self.export_attributes(config_path, symlinks=False,
 					annotation={
 						'# Configuration Descriptor': '',
 						'# bmAttributes: bit 5 support remote wakeup': '',
@@ -125,7 +145,7 @@ class ExportGadget(object):
 					})
 			for entry in config_entries:
 				epath = "%s/%s" % (config_path, entry)
-				print("export_device_configs: epath: %s" % (epath))
+				print("export_device_configs: epath: %s" % (epath), file=sys.stderr)
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory
 					if entry == 'strings':
@@ -151,8 +171,8 @@ class ExportGadget(object):
 		return configs
 
 	def export_function_os_desc(self, os_desc_path):
-		# print("")
-		# print("export_function_os_desc: os_desc_path: %s" % (os_desc_path))
+		# print("", file=sys.stderr)
+		# print("export_function_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
 		os_desc = {}
 		os_desc_entries = sorted(os.listdir(os_desc_path), key=str.casefold)
 		for entry in os_desc_entries:
@@ -162,8 +182,8 @@ class ExportGadget(object):
 		return os_desc
 
 	def export_device_functions(self, functions_path, annotation=None):
-		# print("")
-		# print("export_device_functions: functions_path: %s" % (functions_path))
+		# print("", file=sys.stderr)
+		# print("export_device_functions: functions_path: %s" % (functions_path), file=sys.stderr)
 		functions = [{}, annotation][annotation is not None]
 		for function_name in sorted(os.listdir(functions_path), key=str.casefold):
 			function_path = "%s/%s" % (functions_path, function_name)
@@ -190,24 +210,22 @@ class ExportGadget(object):
 					continue
 
 			functions[function_name] = function
-			pass
+
 		return functions
 
 	def export_device_os_desc(self, os_desc_path):
-		# print("export_device_os_desc: os_desc_path: %s" % (os_desc_path))
+		# print("export_device_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
 		os_desc = self.export_attributes(os_desc_path, symlinks=True)
 		return os_desc
 
-	def export_devices(self):
+	def export_devices(self, annotations=True):
 		device_paths = sorted(os.listdir(self.configpath), key=str.casefold)
 		devices = collections.OrderedDict()
-		devices['# Gadget Device Definition File'] = ''
-		devices["# %s" % (date.today())] = ''
 		for device_name in device_paths:
 			device_path = "%s/%s" % (self.configpath, device_name)
 			device = self.export_attributes(device_path, exclude=['UDC'], idFlag=True,
 					annotation={'# USB Device Descriptor Fields': ''})
-			# print("export_device: device_path: %s" % (device_path))
+			# print("export_device: device_path: %s" % (device_path), file=sys.stderr)
 			device_entries = sorted(os.listdir(device_path), key=str.casefold)
 			if 'strings' in device_entries:
 				epath = "%s/%s" % (device_path, 'strings')
@@ -225,7 +243,7 @@ class ExportGadget(object):
 				device['# Gadget Configurations list'] = ''
 				device['configs'] = self.export_device_configs(epath)
 			for entry in device_entries:
-				# print("export_device: device_path: %s entry: %s" % (device_path, entry))
+				# print("export_device: device_path: %s entry: %s" % (device_path, entry), file=sys.stderr)
 				epath = "%s/%s" % (device_path, entry)
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory

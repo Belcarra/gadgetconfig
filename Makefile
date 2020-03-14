@@ -33,7 +33,7 @@ flake8a:
 	flake8 . --count --select=E9,F63,F7,F82,W391 --show-source --statistics
 
 flake8b:
-	flake8 . --ignore=C901,E701,E117,E265,W191,W391,E128 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	flake8 . --ignore=C901,E701,E117,E265,W191,W391,E128 --count --exit-zero --max-complexity=10 --max-line-length=140 --statistics
 
 doctest:
 	python3 -m doctest src/sysfstree/__init__.py -v
@@ -46,7 +46,7 @@ gadget_modules.tgz:
 		lib/modules/4.19.97-v7l+/kernel/drivers/usb/gadget/function/usb_f_acm.ko \
 		lib/modules/4.19.97-v7l+/kernel/drivers/usb/gadget/function/usb_f_ecm.ko \
 		lib/modules/4.19.97-v7l+/kernel/drivers/usb/dwc2 \
-		lib/modules/4.19.97-v7l+/kernel/drivers/usb/mon 
+		lib/modules/4.19.97-v7l+/kernel/drivers/usb/mon
 		mv /tmp/$@ .
 
 sysfs.tgz:

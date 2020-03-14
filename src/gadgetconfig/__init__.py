@@ -13,6 +13,7 @@ import sys
 import re
 import argparse
 import json
+from datetime import date
 
 try:
 	# from gadgetconfig.add import AddGadget
@@ -31,29 +32,21 @@ except ModuleNotFoundError:
 # __author__  = "Stuart.Lynne@belcarra.com"
 
 
-def remove_old_device(self, configname):
-
-	fpath = "%s/%s" % (self.configpath, configname)
-
-	print("Check for old configuration: %s" % (fpath))
-
-	if not os.path.exists(fpath) and not os.path.lexists(fpath):
-		print("%s does not exist" % (fpath))
-		return
-
-	if not os.path.isdir(fpath):
-		print("ERROR %s exists and is not a directory" % (fpath))
-		exit(1)
-
-	exit(1)
-
-
-# def replace(data, match, repl):
-# 	if isinstance(data, (dict, list)):
-# 		for k, v in (data.items() if isinstance(data, dict) else enumerate(data)):
-# 			if k == match:
-# 				data[k] = repl
-# 			replace(v, match, repl)
+# def remove_old_device(self, configname):
+#
+# 	fpath = "%s/%s" % (self.configpath, configname)
+#
+# 	print("Check for old configuration: %s" % (fpath), file=sys.stderr)
+#
+# 	if not os.path.exists(fpath) and not os.path.lexists(fpath):
+# 		print("%s does not exist" % (fpath), file=sys.stderr)
+# 		return
+#
+# 	if not os.path.isdir(fpath):
+# 		print("ERROR %s exists and is not a directory" % (fpath), file=sys.stderr)
+# 		exit(1)
+#
+# 	exit(1)
 
 
 # this is mainly for testing standalone
@@ -84,6 +77,7 @@ def main():
 	group.add_argument("--disable", help="disable currently enabled Gadget Device", action='store_true')
 	group.add_argument("--query-gadget", help="display currently enabled Gadget Device", action='store_true')
 	group.add_argument("--query-gadgets", help="display current Gadget Devices\n \n", action='store_true')
+	group.add_argument("--query-gadget-functions", help="display current Gadgets functions\n \n", action='store_true')
 
 	parser.add_argument("--soft-disconnect", help="Disconnect or detach the UDC", action='store_true')
 	parser.add_argument("--soft-connect", help="Connect or attach the UDC", action='store_true')
@@ -120,24 +114,27 @@ def main():
 
 	m = ManageGadget(sys_config_path)
 	if args.query_gadget:
-		print("Currently configured: %s" % (m.query_gadget()))
+		print("Currently configured: %s" % (m.query_gadget_verbose()), file=sys.stderr)
 		exit(0)
 	if args.query_gadgets:
-		print("Currently defined gadgets: %s" % (m.query_gadgets()))
+		print("Currently defined gadgets: %s" % (m.query_gadgets()), file=sys.stderr)
 		exit(0)
 	# if args.query_soft_connect:
 	# 	print("Soft-Connect: %s" % (m.query_soft_connect()))
 	# 	exit(0)
 	if args.query_udc:
-		print("UDC State: %s" % (m.query_udc_state()))
-		print("UDC Function: %s" % (m.query_udc_function()))
+		print("UDC State: %s" % (m.query_udc_state()), file=sys.stderr)
+		print("UDC Function: %s" % (m.query_udc_function()), file=sys.stderr)
 		exit(0)
 
 	if args.query_udc_state:
-		print("UDC State: %s" % (m.query_udc_state()))
+		print("UDC State: %s" % (m.query_udc_state()), file=sys.stderr)
 		exit(0)
 	if args.query_udc_function:
-		print("UDC Function: %s" % (m.query_udc_function()))
+		print("UDC Function: %s" % (m.query_udc_function()), file=sys.stderr)
+		exit(0)
+	if args.query_gadget_functions:
+		print("UDC Function: %s" % (m.query_gadget_functions()), file=sys.stderr)
 		exit(0)
 
 	m = ManageGadget(sys_config_path, test=args.test)
@@ -169,11 +166,15 @@ def main():
 		e = ExportGadget(sys_config_path)
 		devices = e.export_devices()
 		j = json.dumps(devices, indent=4)
+		print("# Gadget Device Definition File")
+		print("# %s" % (date.today()))
 		print(re.sub(r'"(#.*)":.*,', r'\1', j))
+		print("# %s" % ("vim: syntax=off"))
+
 		exit(0)
 
 	if args.remove is not None:
-		r = RemoveGadget(sys_config_path)
+		r = RemoveGadget(sys_config_path, m)
 		r.remove_device(args.remove)
 		exit(0)
 
