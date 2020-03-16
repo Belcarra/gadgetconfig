@@ -102,7 +102,7 @@ class ExportGadget(object):
 		#attribute_entries = sorted(os.listdir(path), key=str.casefold)
 
 		attribute_entries = sorted(os.scandir(path), key=lambda dirent: dirent.inode())
-		print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
+		# print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
 
 		idList = ['idVendor', 'idProduct', 'bcdDevice', 'bDeviceClass', 'bDeviceSubClass', 'bDeviceProtocol']
 
@@ -132,16 +132,9 @@ class ExportGadget(object):
 			strings[lang_name] = self.export_attributes(string_path)
 		return strings
 
-	# def interfaces(self, name):
-	# 	(f,n) = split('.', name)
-	# 	if f in self.interfaces:
-	# 		return self.interfaes[f]
-	# 	return -1
-
-
 	def export_device_configs(self, configs_path):
-		print("***********************************", file=sys.stderr)
-		print("export_device_configs: configs_path: %s" % (configs_path), file=sys.stderr)
+		# print("***********************************", file=sys.stderr)
+		# print("export_device_configs: configs_path: %s" % (configs_path), file=sys.stderr)
 		configs = {}
 		for config_name in sorted(os.listdir(configs_path), key=str.casefold):
 
@@ -166,7 +159,7 @@ class ExportGadget(object):
 					})
 			for entry in config_entries:
 				epath = "%s/%s" % (config_path, entry)
-				print("export_device_configs: epath: %s" % (epath), file=sys.stderr)
+				# print("export_device_configs: epath: %s" % (epath), file=sys.stderr)
 				if os.path.isdir(epath) and not os.path.islink(epath):
 					# is a directory
 					if entry == 'strings':

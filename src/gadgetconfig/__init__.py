@@ -32,23 +32,6 @@ except ModuleNotFoundError:
 # __author__  = "Stuart.Lynne@belcarra.com"
 
 
-# def remove_old_device(self, configname):
-#
-# 	fpath = "%s/%s" % (self.configpath, configname)
-#
-# 	print("Check for old configuration: %s" % (fpath), file=sys.stderr)
-#
-# 	if not os.path.exists(fpath) and not os.path.lexists(fpath):
-# 		print("%s does not exist" % (fpath), file=sys.stderr)
-# 		return
-#
-# 	if not os.path.isdir(fpath):
-# 		print("ERROR %s exists and is not a directory" % (fpath), file=sys.stderr)
-# 		exit(1)
-#
-# 	exit(1)
-
-
 # this is mainly for testing standalone
 #
 def main():
@@ -104,8 +87,8 @@ def main():
 
 	args = parser.parse_args()
 
-	print("args: %s" % (args), file=sys.stderr)
-	print("", file=sys.stderr)
+	# print("args: %s" % (args), file=sys.stderr)
+	# print("", file=sys.stderr)
 
 	if args.test:
 		sys_config_path = "sys/kernel/config/usb_gadget"

@@ -186,7 +186,7 @@ class ManageGadget(object):
 	# update UDC file to enable or disable a Gadget
 	def update_udc(self, name, s):
 		udcpath = "%s/%s/UDC" % (self.configpath, name)
-		print("update_udc: %s" % (udcpath), file=sys.stderr)
+		# print("update_udc: %s" % (udcpath), file=sys.stderr)
 		try:
 			f = open(udcpath, 'w')
 			f.write(s)
@@ -199,36 +199,36 @@ class ManageGadget(object):
 	# write \n to UDC to disable a Gadget
 	def disable_current(self):
 		if self.query_gadget() is None:
-			print("disable_current: UDC not attached!", file=sys.stderr)
+			# print("disable_current: UDC not attached!", file=sys.stderr)
 			return False
 
-		print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
+		# print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
 		self.update_udc(self.query_gadget(), "\n")
 		return True
 
 	# write UDC driver name to UDC to enable a Gadget
 	def enable_current(self, name):
 		if not self.query_gadget() is None:
-			print("enable_current: UDC is attached! %s" % (self.query_gadget()), file=sys.stderr)
+			# print("enable_current: UDC is attached! %s" % (self.query_gadget()), file=sys.stderr)
 			return False
 
-		print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
+		# print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
 		self.update_udc(name, self.udclist[0])
 
 	def soft_connect(self, flag):
-		print("soft_connect: %s" % (['disconnect', 'connect'][flag]), file=sys.stderr)
-		print("soft_connect: udc_state: %s" % (self.query_udc_state()), file=sys.stderr)
+		# print("soft_connect: %s" % (['disconnect', 'connect'][flag]), file=sys.stderr)
+		# print("soft_connect: udc_state: %s" % (self.query_udc_state()), file=sys.stderr)
 		if flag:
 			if self.query_udc_state() == "configured":
-				print("UDC already configured!")
+				# print("UDC already configured!")
 				return
 		else:
 			if self.query_udc_state() == "not attached":
-				print("UDC already not attached!")
+				# print("UDC already not attached!")
 				return
 		try:
 			op = ['disconnect', 'connect'][flag]
-			print("udclist: %s op: %s" % (self.udclist, op), file=sys.stderr)
+			# print("udclist: %s op: %s" % (self.udclist, op), file=sys.stderr)
 			f = open("/sys/class/udc/%s/soft_connect" % (self.udclist[0]), 'w')
 			f.write("%s\n" % (['disconnect', 'connect'][flag]))
 			f.close()
@@ -259,7 +259,7 @@ class ManageGadget(object):
 
 	# check_device_file
 	def check_device_file(self, pathname, device_name=None, args=None):
-		print("check_device_file: device_name %s" % (device_name))
+		# print("check_device_file: device_name %s" % (device_name))
 		with io.open(pathname) as f:
 			device_definitions = commentjson.load(f)
 			try:
@@ -269,7 +269,7 @@ class ManageGadget(object):
 				exit(1)
 			for device_name in device_definitions:
 				if device_name in self.query_gadgets():
-					print("check_device_file: %s already defined" % (device_name))
+					# print("check_device_file: %s already defined" % (device_name))
 					return device_name
 		return None
 
@@ -285,7 +285,7 @@ class ManageGadget(object):
 				self.replace(v, match, repl)
 
 	def add_device_file(self, pathname, new_device_name=None, args=None):
-		print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
+		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
 		a = AddGadget(self.configpath)
 		try:
 			f = io.open(pathname)
@@ -304,9 +304,9 @@ class ManageGadget(object):
 				device_name = new_device_name
 			else:
 				device_name = definition_name
-			print('device_name: %s' % (device_name))
+			# print('device_name: %s' % (device_name))
 			if device_name in self.query_gadgets():
-				print("add_device_file: %s already defined" % (device_name))
+				# print("add_device_file: %s already defined" % (device_name))
 				continue
 
 			if args is not None:

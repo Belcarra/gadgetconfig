@@ -72,7 +72,7 @@ class AddGadget(object):
 	# ignoring dictionary entries with values that are not int or str.
 	#
 	def add_attrs(self, path, dict, exclude=[]):
-		print("add_attrs: path: %s dict: %s" % (path, dict))
+		# print("add_attrs: path: %s dict: %s" % (path, dict))
 		exclude.append("#*")
 		for a in dict:
 			if any(fnmatch.fnmatch(a, pattern) for pattern in exclude):
@@ -136,20 +136,20 @@ class AddGadget(object):
 			function_os_descs = function_dict['os_descs']
 			for interface in function_os_descs:
 				ipath = "%s/os_desc/%s" % (function_path, interface)
-				print("create_functions: ipath: %s" % (ipath))
+				# print("create_functions: ipath: %s" % (ipath))
 
 	# create_configs
 	# Create the Gadget Device Configurations
 	def create_configs(self, path, configs_dict):
 
-		print("create_configs: %s" % (configs_dict))
+		# print("create_configs: %s" % (configs_dict))
 
 		configs_path = "%s/configs" % (path)
 
 		for config_name in configs_dict:
 			config_dict = configs_dict[config_name]
-			print("create_configs: %s" % (config_name))
-			print("create_configs: %s" % (config_dict))
+			# print("create_configs: %s" % (config_name))
+			# print("create_configs: %s" % (config_dict))
 
 			# create directory and add the attributes and strings
 			config_path = "%s/%s" % (configs_path, config_name)
@@ -160,7 +160,7 @@ class AddGadget(object):
 			# add the function symlinks
 			function_dict = config_dict['functions']
 			for f in function_dict:
-				print("create_configs: f: %s" % (f))
+				# print("create_configs: f: %s" % (f))
 				function = f['function']
 				target = "%s/%s" % (config_path, f['name'])
 				src = "%s/functions/%s" % (path, function.replace("_", "."))

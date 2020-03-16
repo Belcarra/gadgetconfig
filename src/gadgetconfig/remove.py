@@ -69,7 +69,7 @@ class RemoveGadget(object):
 		#if self.query_udc_state() == "not attached":
 		#	print("disable_current: UDC not attached!")
 		#	return False
-		print("remove_device: %s %s" % (configname, self.m.query_gadget()))
+		# print("remove_device: %s %s" % (configname, self.m.query_gadget()))
 		if configname == self.m.query_gadget():
 			print("The %s Gadget USB Device is currently enabled!" % (configname))
 			exit(1)
@@ -90,7 +90,7 @@ class RemoveGadget(object):
 		#
 		configs_path = "%s/configs" % (device_path)
 		for c in self.listdir(configs_path):
-			print("remove_device: config: %s" % (c))
+			# print("remove_device: config: %s" % (c))
 
 			# 1.
 			config_path = "%s/%s" % (configs_path, c)
@@ -107,13 +107,13 @@ class RemoveGadget(object):
 		for f in self.listdir(functions_path):
 			# 4.
 			self.rmdir("%s/%s" % (functions_path, f))
-			print("AAAA")
-		print("BBBB")
+			# print("AAAA")
+		# print("BBBB")
 
 		# Finally for device path, do step #5 remove strings and then step #6 remove the device
 		#
 		# 5.
 		self.remove_strings(device_path)
-		print("CCCC")
+		# print("CCCC")
 		# 6.
 		self.rmdir(device_path)
