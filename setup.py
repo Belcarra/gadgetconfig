@@ -17,7 +17,7 @@ def main():
         keywords=['usb', 'gadget'],
         description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
         entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
-        install_requires=["argparse", "commentjson"],
+        install_requires=["argparse", "commentjson", "scandir"],
         classifiers=[
             "Programming Language :: Python",
             "Development Status :: 3 - Alpha",
@@ -34,7 +34,12 @@ def main():
         data_files=[
             ('/etc/systemd/system/getty@ttyGS0.service.d', ['service/override.conf']),
             ('/etc/systemd/system/getty@ttyGS1.service.d', ['service/override.conf']),
-            ('/etc/gadgetservice', ['definitions/belcarra-2acm+ecm.json']),
+            ('/etc/gadgetservice', [
+                    'definitions/belcarra-acm-ecm.json',
+                    'definitions/belcarra-acm-eem.json',
+                    'definitions/belcarra-acm.json',
+                    'definitions/belcarra-acm-rndis.json',
+                    'definitions/belcarra-eem-acm.json']),
             ('/usr/lib/gadgetservice', ['service/gadget.start', 'service/gadget.stop']),
             ('/lib/systemd/system', ['service/gadget.service']),
             ('/usr/share/doc/gadgetconfig', ['README.md', 'README-Gadget.md', 'README-Raspbian.md']), ],
