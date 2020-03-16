@@ -30,6 +30,7 @@ import os
 import sys
 import collections
 import fnmatch
+from scandir import scandir, walk
 
 """gadget.py: ..."""
 
@@ -42,6 +43,9 @@ class ExportGadget(object):
 		self.configpath = configpath
 		self.verbose = verbose
 		self.verbose = True
+		# device['# E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage'] = ''
+		# device['#       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial'] = ''
+		self.interfaces = {'acm':2, 'ecm':2, 'eem':1, 'ncm':2, 'hid': 1, 'mass_storage': 1, 'rndis':1, 'serial': 2 }
 
 	def pathread(self, path):
 
@@ -94,10 +98,13 @@ class ExportGadget(object):
 
 		# print("export_attributes: annotation %s" % (annotation), file=sys.stderr)
 		# print("export_attributes: attributes %s" % (attributes), file=sys.stderr)
-		attribute_entries = sorted(os.listdir(path), key=str.casefold)
+
+		#attribute_entries = sorted(os.listdir(path), key=str.casefold)
+
+		attribute_entries = sorted(os.scandir(path), key=lambda dirent: dirent.inode())
+		print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
 
 		idList = ['idVendor', 'idProduct', 'bcdDevice', 'bDeviceClass', 'bDeviceSubClass', 'bDeviceProtocol']
-		# print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
 
 		if idFlag:
 			for entry in idList:
@@ -125,14 +132,28 @@ class ExportGadget(object):
 			strings[lang_name] = self.export_attributes(string_path)
 		return strings
 
+	# def interfaces(self, name):
+	# 	(f,n) = split('.', name)
+	# 	if f in self.interfaces:
+	# 		return self.interfaes[f]
+	# 	return -1
+
+
 	def export_device_configs(self, configs_path):
 		print("***********************************", file=sys.stderr)
 		print("export_device_configs: configs_path: %s" % (configs_path), file=sys.stderr)
 		configs = {}
 		for config_name in sorted(os.listdir(configs_path), key=str.casefold):
+
+			# we need to iterate across the config directory twice, first to get
+			# the sorted attributes and symlink targets. Then a second time
+			# to get the symlink creation times so we can generate the 
+			# functions list in the order they were created in. This appears
+			# to work reliably. 
+			#
+			function_map = {}
 			functions = []
-			print("-------", file=sys.stderr)
-			print("export_device_configs: config_name: %s" % (config_name), file=sys.stderr)
+			# print("export_device_configs: config_name: %s" % (config_name), file=sys.stderr)
 			config_path = "%s/%s" % (configs_path, config_name)
 			config_entries = sorted(os.listdir(config_path), key=str.casefold)
 			config = self.export_attributes(config_path, symlinks=False,
@@ -153,10 +174,10 @@ class ExportGadget(object):
 								annotation={'# USB Device Configuration Strings': ''})
 					continue
 				elif os.path.islink(epath):
-					# symlink - should not be any at this level
+					# get the realpath and save it, os.listdir can't sort by inode
 					realpath = os.path.realpath(epath)
 					(path, target) = os.path.split(realpath)
-					functions.append({'name': entry, 'function': target})
+					function_map[entry] = target
 					continue
 				elif os.path.isfile(epath):
 					# should be regular file
@@ -164,6 +185,26 @@ class ExportGadget(object):
 				else:
 					# unknown!
 					continue
+
+			# config_entries = sorted(os.listdir(config_path), key=str.casefold)
+			config_dirents = sorted(os.scandir(config_path), key=lambda dirent: dirent.inode())
+			# print("************\nexport_device_configs: config_entries %s" % (config_entries), file=sys.stderr)
+			num = 0
+			interface = 0
+			valid = True
+			for dirent in config_dirents:
+				if dirent.is_symlink():
+					functions.append({"# function %d, interface: %s" % (num, interface): '',
+						'name': dirent.name, 'function': function_map[dirent.name]})
+					(f,n) = dirent.name.split('.')
+					if valid and f in self.interfaces:
+						interface += self.interfaces[f]
+					else:
+						valid = false
+						interfaces = ''
+					num += 1
+
+			config['# The order of the functions here determines the order in the Configuration descriptor'] = ''
 
 			config['functions'] = functions
 			configs[config_name] = config
