@@ -187,9 +187,14 @@ class ManageGadget(object):
 	def update_udc(self, name, s):
 		udcpath = "%s/%s/UDC" % (self.configpath, name)
 		print("update_udc: %s" % (udcpath), file=sys.stderr)
-		f = open(udcpath, 'w')
-		f.write(s)
-		f.close()
+		try:
+			f = open(udcpath, 'w')
+			f.write(s)
+			f.close()
+		except (FileNotFoundError):
+			print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
+			exit(1)
+
 
 	# write \n to UDC to disable a Gadget
 	def disable_current(self):
