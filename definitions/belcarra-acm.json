@@ -3,8 +3,8 @@
 {
     "belcarra-acm": {
         # USB Device Descriptor Fields
-        "idVendor": "0x1d6b",
-        "idProduct": "0x0104",
+        "idVendor": "0x15ec",
+        "idProduct": "0xf102",
         "bcdDevice": "0x0001",
         "bDeviceClass": "0x00",
         "bDeviceSubClass": "0x00",

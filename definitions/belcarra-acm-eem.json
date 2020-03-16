@@ -1,21 +1,21 @@
 # Gadget Device Definition File
 # 2020-03-14
 {
-    "belcarra-acm-rndis": {
+    "belcarra-acm-eem": {
         # USB Device Descriptor Fields
         "idVendor": "0x15ec",
         "idProduct": "0xf102",
-        "bcdDevice": "0x0100",
-        "bDeviceClass": "0xef",
-        "bDeviceSubClass": "0x02",
-        "bDeviceProtocol": "0x01",
+        "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
         "bcdUSB": "0x0200",
         "bMaxPacketSize0": "0x40",
         # USB Device Strings
         "strings": {
             "0x409": {
                 "manufacturer": "Belcarra Technologies Corp",
-                "product": "ACM-RNDIS Test",
+                "product": "ACMx2-EEM Gadget",
                 "serialnumber": "0123456789"
             }
         },
@@ -25,19 +25,11 @@
         # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
         "functions": {
             "acm.GS0": {},
-            "rndis.usb0": {
-                "class": "02",
-                "dev_addr": "1a:55:89:a2:69:41",
-                "host_addr": "1a:55:89:a2:69:42",
-                "protocol": "00",
-                "qmult": "5",
-                "subclass": "06",
-                "os_desc": {
-                    "interface.rndis": {
-                        "compatible_id": "",
-                        "sub_compatible_id": ""
-                    }
-                }
+            "acm.GS1": {},
+            "eem.usb0": {
+                "dev_addr": "0e:6a:8a:85:db:76",
+                "host_addr": "c6:34:7c:45:a6:c5",
+                "qmult": "5"
             }
         },
         # Gadget Configurations list
@@ -49,11 +41,11 @@
                 # bmAttributes: bit 7 bus-powered
                 # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
                 "bmAttributes": "0x80",
-                "MaxPower": "244",
+                "MaxPower": "2",
                 "strings": {
                     # USB Device Configuration Strings
                     "0x409": {
-                        "configuration": "Config 1"
+                        "configuration": "CDC 2xACM+EEM"
                     }
                 },
                 "functions": [
@@ -62,8 +54,12 @@
                         "function": "acm.GS0"
                     },
                     {
-                        "name": "rndis.usb0",
-                        "function": "rndis.usb0"
+                        "name": "acm.GS1",
+                        "function": "acm.GS1"
+                    },
+                    {
+                        "name": "eem.usb0",
+                        "function": "eem.usb0"
                     }
                 ]
             }
