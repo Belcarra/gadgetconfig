@@ -259,18 +259,22 @@ class ManageGadget(object):
 
 	# check_device_file
 	def check_device_file(self, pathname, device_name=None, args=None):
-		# print("check_device_file: device_name %s" % (device_name))
-		with io.open(pathname) as f:
+		print("check_device_file: pathname: %s device_name %s" % (pathname, device_name))
+		try:
+			f = io.open(pathname)
+		except (FileNotFoundError):
+			print("check_device_file: File Not Found Error", file=sys.stderr)
+			exit(1)
+		try:
 			device_definitions = commentjson.load(f)
-			try:
-				device_definitions = commentjson.load(f)
-			except (UnexpectedCharacters):
-				print("check_device_file: Unexpected Characters")
-				exit(1)
-			for device_name in device_definitions:
-				if device_name in self.query_gadgets():
-					# print("check_device_file: %s already defined" % (device_name))
-					return device_name
+		except (UnexpectedCharacters):
+			print("check_device_file: Unexpected Characters")
+			exit(1)
+
+		for device_name in device_definitions:
+			if device_name in self.query_gadgets():
+				# print("check_device_file: %s already defined" % (device_name))
+				return device_name
 		return None
 
 	# check_device_name
@@ -285,7 +289,7 @@ class ManageGadget(object):
 				self.replace(v, match, repl)
 
 	def add_device_file(self, pathname, new_device_name=None, args=None):
-		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
+		print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
 		a = AddGadget(self.configpath)
 		try:
 			f = io.open(pathname)
