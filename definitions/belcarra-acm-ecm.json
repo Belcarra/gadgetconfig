@@ -54,12 +54,12 @@
                         "function": "acm.GS0"
                     },
                     {
-                        "name": "acm.GS1",
-                        "function": "acm.GS1"
-                    },
-                    {
                         "name": "ecm.usb0",
                         "function": "ecm.usb0"
+                    },
+                    {
+                        "name": "acm.GS1",
+                        "function": "acm.GS1"
                     }
                 ]
             }
