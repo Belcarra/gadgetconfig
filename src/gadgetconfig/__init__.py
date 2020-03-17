@@ -16,15 +16,15 @@ import json
 from datetime import date
 
 try:
-	# from gadgetconfig.add import AddGadget
-	from gadgetconfig.export import ExportGadget
-	from gadgetconfig.manage import ManageGadget
-	from gadgetconfig.remove import RemoveGadget
-except ModuleNotFoundError:
 	# from add import AddGadget
 	from export import ExportGadget
 	from manage import ManageGadget
 	from remove import RemoveGadget
+except ModuleNotFoundError:
+	# from gadgetconfig.add import AddGadget
+	from gadgetconfig.export import ExportGadget
+	from gadgetconfig.manage import ManageGadget
+	from gadgetconfig.remove import RemoveGadget
 
 
 """gadgetconfig.py: ..."""
@@ -151,7 +151,7 @@ def main():
 		j = json.dumps(devices, indent=4)
 		print("# Gadget Device Definition File")
 		print("# %s" % (date.today()))
-		print(re.sub(r'"(#.*)":.*,', r'\1', j))
+		print(re.sub(r'\\\\', r'\\', re.sub(r'"(#.*)":.*,', r'\1', j)))
 		print("# %s" % ("vim: syntax=off"))
 
 		exit(0)

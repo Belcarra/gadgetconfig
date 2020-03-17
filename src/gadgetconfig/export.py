@@ -30,6 +30,7 @@ import os
 import sys
 import collections
 import fnmatch
+import re
 from scandir import scandir, walk
 
 """gadget.py: ..."""
@@ -101,8 +102,8 @@ class ExportGadget(object):
 
 		#attribute_entries = sorted(os.listdir(path), key=str.casefold)
 
-		attribute_entries = sorted(os.scandir(path), key=lambda dirent: dirent.inode())
-		# print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
+		attribute_entries = [d.name for d in sorted(os.scandir(path), key=lambda dirent: dirent.inode())]
+		#print("export_attributes: entries %s" % (attribute_entries), file=sys.stderr)
 
 		idList = ['idVendor', 'idProduct', 'bcdDevice', 'bDeviceClass', 'bDeviceSubClass', 'bDeviceProtocol']
 
@@ -132,7 +133,7 @@ class ExportGadget(object):
 			strings[lang_name] = self.export_attributes(string_path)
 		return strings
 
-	def export_device_configs(self, configs_path):
+	def export_device_configs(self, configs_path, idVendor, idProduct):
 		# print("***********************************", file=sys.stderr)
 		# print("export_device_configs: configs_path: %s" % (configs_path), file=sys.stderr)
 		configs = {}
@@ -185,10 +186,15 @@ class ExportGadget(object):
 			num = 0
 			interface = 0
 			valid = True
+			idVendor = re.sub(r'0x(.*)',r'\1',idVendor)
+			idProduct = re.sub(r'0x(.*)',r'\1',idProduct)
 			for dirent in config_dirents:
 				if dirent.is_symlink():
-					functions.append({"# function %d, interface: %s" % (num, interface): '',
-						'name': dirent.name, 'function': function_map[dirent.name]})
+					if len(config_dirents):
+						a = "# Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
+					else:
+						a = '# function %d, USB\\vid_%s&pid_%s interface: %s' % (num, idVendor.upper(), idProduct.upper(), interface)
+					functions.append({a: '', 'name': dirent.name, 'function': function_map[dirent.name]})
 					(f,n) = dirent.name.split('.')
 					if valid and f in self.interfaces:
 						interface += self.interfaces[f]
@@ -259,6 +265,7 @@ class ExportGadget(object):
 			device_path = "%s/%s" % (self.configpath, device_name)
 			device = self.export_attributes(device_path, exclude=['UDC'], idFlag=True,
 					annotation={'# USB Device Descriptor Fields': ''})
+			print("export_device: device: %s" % (device), file=sys.stderr)
 			# print("export_device: device_path: %s" % (device_path), file=sys.stderr)
 			device_entries = sorted(os.listdir(device_path), key=str.casefold)
 			if 'strings' in device_entries:
@@ -275,7 +282,7 @@ class ExportGadget(object):
 			if 'configs' in device_entries:
 				epath = "%s/%s" % (device_path, 'configs')
 				device['# Gadget Configurations list'] = ''
-				device['configs'] = self.export_device_configs(epath)
+				device['configs'] = self.export_device_configs(epath, device['idVendor'], device['idProduct'])
 			for entry in device_entries:
 				# print("export_device: device_path: %s entry: %s" % (device_path, entry), file=sys.stderr)
 				epath = "%s/%s" % (device_path, entry)
