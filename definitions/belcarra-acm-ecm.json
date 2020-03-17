@@ -1,5 +1,5 @@
 # Gadget Device Definition File
-# 2020-03-14
+# 2020-03-17
 {
     "belcarra-acm-ecm": {
         # USB Device Descriptor Fields
@@ -14,9 +14,9 @@
         # USB Device Strings
         "strings": {
             "0x409": {
-                "manufacturer": "Belcarra Technologies Corp",
+                "serialnumber": "0123456789",
                 "product": "ACMx2-ECM Gadget",
-                "serialnumber": "0123456789"
+                "manufacturer": "Belcarra Technologies Corp"
             }
         },
         # Gadget Functions list: see /sys/module/usb_f*,
@@ -27,9 +27,9 @@
             "acm.GS0": {},
             "acm.GS1": {},
             "ecm.usb0": {
-                "dev_addr": "0e:6a:8a:85:db:76",
+                "qmult": "5",
                 "host_addr": "c6:34:7c:45:a6:c5",
-                "qmult": "5"
+                "dev_addr": "0e:6a:8a:85:db:76"
             }
         },
         # Gadget Configurations list
@@ -48,16 +48,20 @@
                         "configuration": "CDC 2xACM+ECM"
                     }
                 },
+                # This determines the order in the Configuration descriptor
                 "functions": [
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_00
                         "name": "acm.GS0",
                         "function": "acm.GS0"
                     },
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_02
                         "name": "ecm.usb0",
                         "function": "ecm.usb0"
                     },
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_04
                         "name": "acm.GS1",
                         "function": "acm.GS1"
                     }
@@ -67,8 +71,8 @@
         # Microsoft OS Descriptors Support
         # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
         "os_desc": {
-            "b_vendor_code": "0x00",
             "qw_sign": "",
+            "b_vendor_code": "0x00",
             "use": "0"
         }
     }

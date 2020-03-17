@@ -1,5 +1,5 @@
 # Gadget Device Definition File
-# 2020-03-14
+# 2020-03-17
 {
     "belcarra-acm-rndis": {
         # USB Device Descriptor Fields
@@ -14,9 +14,9 @@
         # USB Device Strings
         "strings": {
             "0x409": {
-                "manufacturer": "Belcarra Technologies Corp",
+                "serialnumber": "0123456789",
                 "product": "ACM-RNDIS Test",
-                "serialnumber": "0123456789"
+                "manufacturer": "Belcarra Technologies Corp"
             }
         },
         # Gadget Functions list: see /sys/module/usb_f*,
@@ -26,16 +26,16 @@
         "functions": {
             "acm.GS0": {},
             "rndis.usb0": {
-                "class": "02",
-                "dev_addr": "1a:55:89:a2:69:41",
-                "host_addr": "1a:55:89:a2:69:42",
                 "protocol": "00",
-                "qmult": "5",
                 "subclass": "06",
+                "class": "02",
+                "qmult": "5",
+                "host_addr": "1a:55:89:a2:69:42",
+                "dev_addr": "1a:55:89:a2:69:41",
                 "os_desc": {
                     "interface.rndis": {
-                        "compatible_id": "",
-                        "sub_compatible_id": ""
+                        "sub_compatible_id": "",
+                        "compatible_id": ""
                     }
                 }
             }
@@ -56,12 +56,15 @@
                         "configuration": "Config 1"
                     }
                 },
+                # This determines the order in the Configuration descriptor
                 "functions": [
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_00
                         "name": "acm.GS0",
                         "function": "acm.GS0"
                     },
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_02
                         "name": "rndis.usb0",
                         "function": "rndis.usb0"
                     }
@@ -71,8 +74,8 @@
         # Microsoft OS Descriptors Support
         # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
         "os_desc": {
-            "b_vendor_code": "0x00",
             "qw_sign": "",
+            "b_vendor_code": "0x00",
             "use": "0"
         }
     }

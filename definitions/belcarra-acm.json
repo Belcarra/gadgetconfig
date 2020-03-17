@@ -1,5 +1,5 @@
 # Gadget Device Definition File
-# 2020-03-14
+# 2020-03-17
 {
     "belcarra-acm": {
         # USB Device Descriptor Fields
@@ -14,9 +14,9 @@
         # USB Device Strings
         "strings": {
             "0x409": {
-                "manufacturer": "Belcarra Technologies Corp",
+                "serialnumber": "0123456789",
                 "product": "ACMx2 Gadget",
-                "serialnumber": "0123456789"
+                "manufacturer": "Belcarra Technologies Corp"
             }
         },
         # Gadget Functions list: see /sys/module/usb_f*,
@@ -43,12 +43,15 @@
                         "configuration": "CDC 2xACM"
                     }
                 },
+                # This determines the order in the Configuration descriptor
                 "functions": [
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_00
                         "name": "acm.GS0",
                         "function": "acm.GS0"
                     },
                     {
+                        # Host Match USB\VID_15EC&PID_F102&MI_02
                         "name": "acm.GS1",
                         "function": "acm.GS1"
                     }
@@ -58,8 +61,8 @@
         # Microsoft OS Descriptors Support
         # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
         "os_desc": {
-            "b_vendor_code": "0x00",
             "qw_sign": "",
+            "b_vendor_code": "0x00",
             "use": "0"
         }
     }

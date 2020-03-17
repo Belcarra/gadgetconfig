@@ -42,7 +42,7 @@ def main():
                     'definitions/belcarra-eem-acm.json']),
             ('/usr/lib/gadgetservice', ['service/gadget.start', 'service/gadget.stop']),
             ('/lib/systemd/system', ['service/gadget.service']),
-            ('/usr/share/doc/gadgetconfig', ['README.md', 'README-Gadget.md', 'README-Raspbian.md']), ],
+            ('/usr/share/doc/gadgetconfig', ['README.md', 'docs/README-Gadget.md', 'README-Raspbian.md']), ],
 
         long_description=open('README.md').read(),
         long_description_content_type='text/markdown'

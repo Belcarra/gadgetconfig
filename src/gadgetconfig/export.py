@@ -191,9 +191,9 @@ class ExportGadget(object):
 			for dirent in config_dirents:
 				if dirent.is_symlink():
 					if len(config_dirents):
-						a = "# Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
+						a = "# Host Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
 					else:
-						a = '# function %d, USB\\vid_%s&pid_%s interface: %s' % (num, idVendor.upper(), idProduct.upper(), interface)
+						a = "# Host Match USB\\VID_%s&PID_%s" % (idVendor.upper(), idProduct.upper())
 					functions.append({a: '', 'name': dirent.name, 'function': function_map[dirent.name]})
 					(f,n) = dirent.name.split('.')
 					if valid and f in self.interfaces:
@@ -203,7 +203,7 @@ class ExportGadget(object):
 						interfaces = ''
 					num += 1
 
-			config['# The order of the functions here determines the order in the Configuration descriptor'] = ''
+			config['# This determines the order in the Configuration descriptor'] = ''
 
 			config['functions'] = functions
 			configs[config_name] = config
