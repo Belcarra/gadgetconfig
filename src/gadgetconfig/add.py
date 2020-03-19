@@ -34,6 +34,19 @@ class AddGadget(object):
 		except (PermissionError):
 			print("%s %s PERMISSION DENIED" % (path, s.strip()))
 
+	def write_bytes(self, path, bytes):
+		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
+		print("write_bytes: %s \"%s\"" % (path, bytes))
+		intarray = [ int(b,0) for b in bytes]
+		binarray = bytearray(intarray)
+		print("write_bytes: %s" % (binarray))
+		try:
+			f = open(path, "ab")
+			f.write(binarray)
+			f.close()
+		except (PermissionError):
+			print("%s %s PERMISSION DENIED" % (path, s.strip()))
+
 	def makedirs(self, lpath):
 		self.vprint("makedirs: %s" % (lpath))
 		os.makedirs(lpath)
@@ -77,6 +90,7 @@ class AddGadget(object):
 		for a in dict:
 			if any(fnmatch.fnmatch(a, pattern) for pattern in exclude):
 				continue
+			print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])))
 			if isinstance(dict[a], (int, str)):
 				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
 
@@ -131,12 +145,14 @@ class AddGadget(object):
 			self.add_attrs(function_path, function_dict)
 
 			# os_descs is optional, may not be present
-			if 'os_descs' not in function_dict:
-				continue
-			function_os_descs = function_dict['os_descs']
-			for interface in function_os_descs:
-				ipath = "%s/os_desc/%s" % (function_path, interface)
-				# print("create_functions: ipath: %s" % (ipath))
+			if 'os_descs' in function_dict:
+				function_os_descs = function_dict['os_descs']
+				for interface in function_os_descs:
+					ipath = "%s/os_desc/%s" % (function_path, interface)
+					# print("create_functions: ipath: %s" % (ipath))
+			if 'report_desc' in function_dict:
+				rpath = "%s/report_desc" % (function_path)
+				self.write_bytes(rpath, function_dict['report_desc'])
 
 	# create_configs
 	# Create the Gadget Device Configurations

@@ -13,6 +13,7 @@ import sys
 import re
 import argparse
 import json
+from prettyjson import prettyjson
 from datetime import date
 
 try:
@@ -148,7 +149,8 @@ def main():
 	if args.export:
 		e = ExportGadget(sys_config_path)
 		devices = e.export_devices()
-		j = json.dumps(devices, indent=4)
+		#j = json.dumps(devices, indent=4)
+		j = prettyjson(devices, indent=4, maxlinelength=100)
 		print("# Gadget Device Definition File")
 		print("# %s" % (date.today()))
 		print(re.sub(r'\\\\', r'\\', re.sub(r'"(#.*)":.*,', r'\1', j)))

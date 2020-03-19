@@ -17,7 +17,7 @@ def main():
         keywords=['usb', 'gadget'],
         description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
         entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
-        install_requires=["argparse", "commentjson", "scandir"],
+        install_requires=["argparse", "commentjson", "prettyjson", "scandir"],
         classifiers=[
             "Programming Language :: Python",
             "Development Status :: 3 - Alpha",

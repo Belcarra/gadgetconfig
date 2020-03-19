@@ -71,7 +71,17 @@ class ExportGadget(object):
 			except (PermissionError, OSError):
 				return ''
 			except UnicodeDecodeError:
-				return '[UnicodeDecodeError]'
+				print('pathread: [UnicodeDecodeError]', file=sys.stderr)
+
+			try:
+				f = open(path, "rb")
+				bytes = f.read(4096)
+				f.close
+			except (PermissionError, OSError):
+				return ''
+			# print("bytes: %s" % (type(bytes)), file=sys.stderr)
+			# print("bytes: %s" % (bytes), file=sys.stderr)
+			return bytes
 
 		return '<UNKNOWN>'
 
@@ -86,7 +96,14 @@ class ExportGadget(object):
 			return tail
 		if os.path.isdir(epath) or os.path.islink(epath) or not os.path.isfile(epath):
 			return None
-		return self.pathread(epath)[0].rstrip('\t\r\n\0')
+		data = self.pathread(epath)
+		if isinstance(data, bytes):
+			a = []
+			for b in data:
+				a.append("0x%02x" % (b))
+			print("export_attribute_entry: b: %s" % (a), file=sys.stderr)
+			return a
+		return data[0].rstrip('\t\r\n\0')
 
 	def export_attribute(self, path, attributes, entry):
 		if entry not in attributes:
@@ -182,7 +199,7 @@ class ExportGadget(object):
 
 			# config_entries = sorted(os.listdir(config_path), key=str.casefold)
 			config_dirents = sorted(os.scandir(config_path), key=lambda dirent: dirent.inode())
-			# print("************\nexport_device_configs: config_entries %s" % (config_entries), file=sys.stderr)
+			print("************\nexport_device_configs: config_entries %s" % (config_entries), file=sys.stderr)
 			num = 0
 			interface = 0
 			valid = True
@@ -190,12 +207,14 @@ class ExportGadget(object):
 			idProduct = re.sub(r'0x(.*)',r'\1',idProduct)
 			for dirent in config_dirents:
 				if dirent.is_symlink():
+					print("export_device_configs: name: %s" % (dirent.name), file=sys.stderr)
 					if len(config_dirents):
 						a = "# Host Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
 					else:
 						a = "# Host Match USB\\VID_%s&PID_%s" % (idVendor.upper(), idProduct.upper())
 					functions.append({a: '', 'name': dirent.name, 'function': function_map[dirent.name]})
-					(f,n) = dirent.name.split('.')
+					# (f,n) = dirent.name.split('.')
+					(f,n) = function_map[dirent.name].split('.')
 					if valid and f in self.interfaces:
 						interface += self.interfaces[f]
 					else:
