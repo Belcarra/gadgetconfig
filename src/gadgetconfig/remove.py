@@ -7,6 +7,7 @@
 #
 
 import os
+import fnmatch
 
 """remove.py: ..."""
 
@@ -103,8 +104,18 @@ class RemoveGadget(object):
 
 		# iterate across device path / functions so we can
 		# perform step #4, rmdir each
+		#
 		functions_path = "%s/functions" % (device_path)
 		for f in self.listdir(functions_path):
+
+			# N.B. mass_storage has sub-functions lun.0...lun.N, 
+			# lun.1...lun.N must be removed, lun.0 cannot be removed
+			sfunctions_path = "%s/%s" % (functions_path, f)
+			for d in self.listdir("%s/%s" % (functions_path, f)):
+				if d == 'lun.0':
+					continue
+				if fnmatch.fnmatch(d, "lun.*"):
+					self.rmdir("%s/%s" % (sfunctions_path, d))
 			# 4.
 			self.rmdir("%s/%s" % (functions_path, f))
 			# print("AAAA")

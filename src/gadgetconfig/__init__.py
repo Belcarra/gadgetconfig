@@ -13,7 +13,6 @@ import sys
 import re
 import argparse
 import json
-from prettyjson import prettyjson
 from datetime import date
 
 try:
@@ -21,11 +20,13 @@ try:
 	from export import ExportGadget
 	from manage import ManageGadget
 	from remove import RemoveGadget
+	from prettyjson import prettyjson
 except ModuleNotFoundError:
 	# from gadgetconfig.add import AddGadget
 	from gadgetconfig.export import ExportGadget
 	from gadgetconfig.manage import ManageGadget
 	from gadgetconfig.remove import RemoveGadget
+	from gadgetconfig.prettyjson import prettyjson
 
 
 """gadgetconfig.py: ..."""

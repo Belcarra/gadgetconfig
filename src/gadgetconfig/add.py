@@ -7,6 +7,7 @@
 #
 
 import os
+import sys
 import fnmatch
 
 """gadget.py: ..."""
@@ -23,7 +24,7 @@ class AddGadget(object):
 
 	def vprint(self, s):
 		if self.verbose:
-			print(s)
+			print(s, file=sys.stderr)
 
 	def write_str(self, path, s):
 		self.vprint("write_str: %s \"%s\"" % (path, s.strip()))
@@ -32,24 +33,30 @@ class AddGadget(object):
 			f.writelines(s)
 			f.close()
 		except (PermissionError):
-			print("%s %s PERMISSION DENIED" % (path, s.strip()))
+			print("%s %s PERMISSION DENIED" % (path, s.strip()), file=sys.stderr)
 
 	def write_bytes(self, path, bytes):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
-		print("write_bytes: %s \"%s\"" % (path, bytes))
+		print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
 		intarray = [ int(b,0) for b in bytes]
 		binarray = bytearray(intarray)
-		print("write_bytes: %s" % (binarray))
+		print("write_bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
 		except (PermissionError):
-			print("%s %s PERMISSION DENIED" % (path, s.strip()))
+			print("%s %s PERMISSION DENIED" % (path, s.strip()), file=sys.stderr)
 
-	def makedirs(self, lpath):
+	def makedirs(self, lpath, existsok=False):
 		self.vprint("makedirs: %s" % (lpath))
-		os.makedirs(lpath)
+		try:
+			os.makedirs(lpath)
+		except (FileExistsError):
+			if existsok: return
+			print("makedirs: %s FileExistsError" % (lpath), file=sys.stderr)
+			exit(1)
+
 
 	def symlink(self, src, target):
 		self.vprint("symlink: %s -> %s" % (target, src))
@@ -85,12 +92,12 @@ class AddGadget(object):
 	# ignoring dictionary entries with values that are not int or str.
 	#
 	def add_attrs(self, path, dict, exclude=[]):
-		# print("add_attrs: path: %s dict: %s" % (path, dict))
+		# print("add_attrs: path: %s dict: %s" % (path, dict), file=sys.stderr)
 		exclude.append("#*")
 		for a in dict:
 			if any(fnmatch.fnmatch(a, pattern) for pattern in exclude):
 				continue
-			print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])))
+			# print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])), file=sys.stderr)
 			if isinstance(dict[a], (int, str)):
 				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
 
@@ -104,7 +111,7 @@ class AddGadget(object):
 		except (KeyError):
 			return
 
-		# print("create_device_os_descs_dict: %s" % (os_descs_dict))
+		# print("create_device_os_descs_dict: %s" % (os_descs_dict), file=sys.stderr)
 		if os_descs_dict is None:
 			return
 
@@ -125,11 +132,18 @@ class AddGadget(object):
 
 		self.add_attrs(lpath, os_descs_dict, exclude=['config_id', 'config_name'])
 
+	# create_subfunctions
+	#
+	def create_subfunctions(self, subfunction_path, subfunction_dict):
+		print("create_subfunctions: %s" % (subfunction_dict), file=sys.stderr)
+		self.makedirs(subfunction_path, existsok=True)
+		self.add_attrs(subfunction_path, subfunction_dict)
+
 	# create_functions
 	# Create the Gadget Device Functions
 	def create_functions(self, path, functions_dict):
 
-		# print("create_functions: %s" % (functions_dict))
+		# print("create_functions: %s" % (functions_dict), file=sys.stderr)
 
 		functions_path = "%s/functions" % (path)
 		exclude = ['#*']
@@ -137,35 +151,47 @@ class AddGadget(object):
 			if any(fnmatch.fnmatch(function_name, pattern) for pattern in exclude):
 				continue
 
-			# print("create_functions: %s %s" % (function_name, functions_dict[function_name]))
+			#print("create_functions: %s type: %s %s" % (function_name, type(functions_dict[function_name]), functions_dict[function_name]), file=sys.stderr)
 
-			function_dict = functions_dict[function_name]
 			function_path = "%s/%s" % (functions_path, function_name)
+			function_dict = functions_dict[function_name]
+
 			self.makedirs(function_path)
 			self.add_attrs(function_path, function_dict)
+
+			# mass storage has sub lun.0...lun.N directories
+			for l in function_dict:
+				if not fnmatch.fnmatch(l, 'lun.*'): continue
+				print("****\ncreate_functions: %s" % (l), file=sys.stderr)
+				self.create_subfunctions("%s/%s" % (function_path, l), function_dict[l])
 
 			# os_descs is optional, may not be present
 			if 'os_descs' in function_dict:
 				function_os_descs = function_dict['os_descs']
 				for interface in function_os_descs:
 					ipath = "%s/os_desc/%s" % (function_path, interface)
-					# print("create_functions: ipath: %s" % (ipath))
+					# print("create_functions: ipath: %s" % (ipath), file=sys.stderr)
+
+			# report_descs is optional, typical hid only
 			if 'report_desc' in function_dict:
 				rpath = "%s/report_desc" % (function_path)
 				self.write_bytes(rpath, function_dict['report_desc'])
+
+
+
 
 	# create_configs
 	# Create the Gadget Device Configurations
 	def create_configs(self, path, configs_dict):
 
-		# print("create_configs: %s" % (configs_dict))
+		# print("create_configs: %s" % (configs_dict), file=sys.stderr)
 
 		configs_path = "%s/configs" % (path)
 
 		for config_name in configs_dict:
 			config_dict = configs_dict[config_name]
-			# print("create_configs: %s" % (config_name))
-			# print("create_configs: %s" % (config_dict))
+			# print("create_configs: %s" % (config_name), file=sys.stderr)
+			# print("create_configs: %s" % (config_dict), file=sys.stderr)
 
 			# create directory and add the attributes and strings
 			config_path = "%s/%s" % (configs_path, config_name)
@@ -176,10 +202,11 @@ class AddGadget(object):
 			# add the function symlinks
 			function_dict = config_dict['functions']
 			for f in function_dict:
-				# print("create_configs: f: %s" % (f))
+				# print("create_configs: f: %s" % (f), file=sys.stderr)
 				function = f['function']
 				target = "%s/%s" % (config_path, f['name'])
-				src = "%s/functions/%s" % (path, function.replace("_", "."))
+				# src = "%s/functions/%s" % (path, function.replace("_", "."))
+				src = "%s/functions/%s" % (path, function)
 				# target = "%s/%s" % (config_path, f)
 				self.symlink(src, target)
 

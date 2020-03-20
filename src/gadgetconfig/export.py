@@ -83,12 +83,12 @@ class ExportGadget(object):
 			# print("bytes: %s" % (bytes), file=sys.stderr)
 			return bytes
 
-		return '<UNKNOWN>'
+		return None
 
 	def export_attribute_entry(self, path, entry, symlinks=False, exclude=[]):
 		if any(fnmatch.fnmatch(entry, pattern) for pattern in exclude):
 			return None
-		# print("export_attributes: entry %s" % (entry), file=sys.stderr)
+		print("export_attributes: entry %s" % (entry), file=sys.stderr)
 		epath = "%s/%s" % (path, entry)
 		if symlinks and os.path.islink(epath):
 			realpath = os.path.realpath(epath)
@@ -103,6 +103,9 @@ class ExportGadget(object):
 				a.append("0x%02x" % (b))
 			print("export_attribute_entry: b: %s" % (a), file=sys.stderr)
 			return a
+		print("data: %s" % (data), file=sys.stderr)
+		if data is None or len(data) == 0:
+			return
 		return data[0].rstrip('\t\r\n\0')
 
 	def export_attribute(self, path, attributes, entry):
@@ -218,7 +221,7 @@ class ExportGadget(object):
 					if valid and f in self.interfaces:
 						interface += self.interfaces[f]
 					else:
-						valid = false
+						valid = False
 						interfaces = ''
 					num += 1
 
@@ -240,6 +243,17 @@ class ExportGadget(object):
 				os_desc[entry] = self.export_attributes(epath)
 		return os_desc
 
+	def export_function_lun(self, lun_path):
+		# print("", file=sys.stderr)
+		print("export_function_lun: lun_path: %s" % (lun_path), file=sys.stderr)
+		lun = {}
+		lun_entries = sorted(os.listdir(lun_path), key=str.casefold)
+		for entry in lun_entries:
+			epath = "%s/%s" % (lun_path, entry)
+			if os.path.isdir(epath) and not os.path.islink(epath) and fnmatch.fnmatch(entry, "interface.*"):
+				lun[entry] = self.export_attributes(epath)
+		return os_desc
+
 	def export_device_functions(self, functions_path, annotation=None):
 		# print("", file=sys.stderr)
 		# print("export_device_functions: functions_path: %s" % (functions_path), file=sys.stderr)
@@ -254,6 +268,9 @@ class ExportGadget(object):
 					# is a directory
 					if entry == 'os_desc':
 						function[entry] = self.export_function_os_desc(epath)
+					if fnmatch.fnmatch(entry, 'lun.*'):
+						print("export_device_functions: %s" % (entry), file=sys.stderr)
+						function[entry] = self.export_attributes(epath)
 					continue
 				elif os.path.islink(epath):
 					# sysmlink - should not be any at this level
