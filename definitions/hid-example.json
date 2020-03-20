@@ -1,5 +1,5 @@
 # Gadget Device Definition File
-# 2020-03-18
+# 2020-03-20
 {
     "g2": {
         # USB Device Descriptor Fields
@@ -58,7 +58,7 @@
                 # This determines the order in the Configuration descriptor
                 "functions": [
                     {
-                        # Host Match USB\VID_1D6B&PID_0104&MI_00
+                        # Host Match USB\VID_1D6B&PID_0104
                         "name": "some_name",
                         "function": "hid.usb0"
                     }

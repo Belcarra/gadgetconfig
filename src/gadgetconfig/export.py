@@ -208,10 +208,14 @@ class ExportGadget(object):
 			valid = True
 			idVendor = re.sub(r'0x(.*)',r'\1',idVendor)
 			idProduct = re.sub(r'0x(.*)',r'\1',idProduct)
+			print("****\nexport_device_configs: len(config_dirents) %s" % (len(config_dirents)), file=sys.stderr)
+			symlinks = 0
+			for dirent in config_dirents:
+				if dirent.is_symlink(): symlinks += 1
 			for dirent in config_dirents:
 				if dirent.is_symlink():
 					print("export_device_configs: name: %s" % (dirent.name), file=sys.stderr)
-					if len(config_dirents):
+					if symlinks > 1:
 						a = "# Host Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
 					else:
 						a = "# Host Match USB\\VID_%s&PID_%s" % (idVendor.upper(), idProduct.upper())

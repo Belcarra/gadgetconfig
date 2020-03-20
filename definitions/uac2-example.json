@@ -53,7 +53,7 @@
                 # This determines the order in the Configuration descriptor
                 "functions": [
                     {
-                        # Host Match USB\VID_1D6B&PID_0104&MI_00
+                        # Host Match USB\VID_1D6B&PID_0104
                         "name": "some_name",
                         "function": "uac2.usb0"
                     }
