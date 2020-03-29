@@ -6,13 +6,11 @@
 # gadgetconfig configures and enables a Gadget USB configuration
 #
 
-import os
 import sys
 
 # import io
 import re
 import argparse
-import json
 from datetime import date
 
 try:
