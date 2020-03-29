@@ -26,6 +26,7 @@ class ManageGadget(object):
 	def __init__(self, configpath, test=False):
 		self.configpath = configpath
 		self.udcpath = "/sys/class/udc"
+		self.realudcpath = ''
 		self.udclist = []
 		self.test = test
 		self.configured_device = ''
@@ -140,6 +141,9 @@ class ManageGadget(object):
 		return sorted(gadgets, key=str.casefold)
 		#return gadgets
 
+	def query_udc_path(self):
+		return self.realudcpath
+
 	def query_udc_function(self):
 		function_path = "%s/function" % (self.realudcpath)
 		function = self.pathread(function_path)
@@ -195,7 +199,6 @@ class ManageGadget(object):
 			print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
 			exit(1)
 
-
 	# write \n to UDC to disable a Gadget
 	def disable_current(self):
 		if self.query_gadget() is None:
@@ -227,7 +230,7 @@ class ManageGadget(object):
 				# print("UDC already not attached!")
 				return
 		try:
-			op = ['disconnect', 'connect'][flag]
+			# op = ['disconnect', 'connect'][flag]
 			# print("udclist: %s op: %s" % (self.udclist, op), file=sys.stderr)
 			f = open("/sys/class/udc/%s/soft_connect" % (self.udclist[0]), 'w')
 			f.write("%s\n" % (['disconnect', 'connect'][flag]))
@@ -249,7 +252,8 @@ class ManageGadget(object):
 		with io.open(pathname) as f:
 			try:
 				device_definitions = commentjson.load(f)
-			except (UnexpectedCharacters):
+			# except (UnexpectedCharacters):
+			except:
 				print("get_device_name: Unexpected Characters")
 				exit(1)
 			names = []
@@ -267,7 +271,8 @@ class ManageGadget(object):
 			exit(1)
 		try:
 			device_definitions = commentjson.load(f)
-		except (UnexpectedCharacters):
+		# except (UnexpectedCharacters):
+		except:
 			print("check_device_file: Unexpected Characters")
 			exit(1)
 
@@ -298,7 +303,8 @@ class ManageGadget(object):
 			exit(1)
 		try:
 			device_definitions = commentjson.load(f)
-		except (UnexpectedCharacters):
+		# except (UnexpectedCharacters):
+		except:
 			print("add_device_file: Unexpected Characters")
 			exit(1)
 
