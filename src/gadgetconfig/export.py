@@ -3,6 +3,9 @@
 # Set encoding default for python 2.7
 # vim: syntax=python noexpandtab
 
+# ToDo
+# 1. export config_id and config_name in osdesc
+
 # gadgetconfig configures and enables a Gadget USB configuration
 #
 # N.B. annotations are supported by adding comments attributes:
@@ -31,7 +34,6 @@ import sys
 import collections
 import fnmatch
 import re
-from scandir import scandir, walk
 
 """gadget.py: ..."""
 
@@ -46,7 +48,7 @@ class ExportGadget(object):
 		self.verbose = True
 		# device['# E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage'] = ''
 		# device['#       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial'] = ''
-		self.interfaces = {'acm':2, 'ecm':2, 'eem':1, 'ncm':2, 'hid': 1, 'mass_storage': 1, 'rndis':1, 'serial': 2 }
+		self.interfaces = {'acm': 2, 'ecm': 2, 'eem': 1, 'ncm': 2, 'hid': 1, 'mass_storage': 1, 'rndis': 1, 'serial': 2}
 
 	def pathread(self, path):
 
@@ -161,9 +163,9 @@ class ExportGadget(object):
 
 			# we need to iterate across the config directory twice, first to get
 			# the sorted attributes and symlink targets. Then a second time
-			# to get the symlink creation times so we can generate the 
+			# to get the symlink creation times so we can generate the
 			# functions list in the order they were created in. This appears
-			# to work reliably. 
+			# to work reliably.
 			#
 			function_map = {}
 			functions = []
@@ -206,8 +208,8 @@ class ExportGadget(object):
 			num = 0
 			interface = 0
 			valid = True
-			idVendor = re.sub(r'0x(.*)',r'\1',idVendor)
-			idProduct = re.sub(r'0x(.*)',r'\1',idProduct)
+			idVendor = re.sub(r'0x(.*)', r'\1', idVendor)
+			idProduct = re.sub(r'0x(.*)', r'\1', idProduct)
 			print("****\nexport_device_configs: len(config_dirents) %s" % (len(config_dirents)), file=sys.stderr)
 			symlinks = 0
 			for dirent in config_dirents:
@@ -221,12 +223,11 @@ class ExportGadget(object):
 						a = "# Host Match USB\\VID_%s&PID_%s" % (idVendor.upper(), idProduct.upper())
 					functions.append({a: '', 'name': dirent.name, 'function': function_map[dirent.name]})
 					# (f,n) = dirent.name.split('.')
-					(f,n) = function_map[dirent.name].split('.')
+					(f, n) = function_map[dirent.name].split('.')
 					if valid and f in self.interfaces:
 						interface += self.interfaces[f]
 					else:
 						valid = False
-						interfaces = ''
 					num += 1
 
 			config['# This determines the order in the Configuration descriptor'] = ''
@@ -245,17 +246,6 @@ class ExportGadget(object):
 			epath = "%s/%s" % (os_desc_path, entry)
 			if os.path.isdir(epath) and not os.path.islink(epath) and fnmatch.fnmatch(entry, "interface.*"):
 				os_desc[entry] = self.export_attributes(epath)
-		return os_desc
-
-	def export_function_lun(self, lun_path):
-		# print("", file=sys.stderr)
-		print("export_function_lun: lun_path: %s" % (lun_path), file=sys.stderr)
-		lun = {}
-		lun_entries = sorted(os.listdir(lun_path), key=str.casefold)
-		for entry in lun_entries:
-			epath = "%s/%s" % (lun_path, entry)
-			if os.path.isdir(epath) and not os.path.islink(epath) and fnmatch.fnmatch(entry, "interface.*"):
-				lun[entry] = self.export_attributes(epath)
 		return os_desc
 
 	def export_device_functions(self, functions_path, annotation=None):
@@ -294,8 +284,21 @@ class ExportGadget(object):
 		return functions
 
 	def export_device_os_desc(self, os_desc_path):
-		# print("export_device_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
-		os_desc = self.export_attributes(os_desc_path, symlinks=True)
+		print("export_device_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
+		os_desc = self.export_attributes(os_desc_path, symlinks=False)
+		print("export_device_os_desc: os_desc: %s" % (os_desc), file=sys.stderr)
+
+		for e in os.listdir(os_desc_path):
+			if not os.path.islink("%s/%s" % (os_desc_path, e)):
+				print("export_device_os_desc: e: %s NOT" % (e), file=sys.stderr)
+				continue
+			print("export_device_os_desc: e: %s" % (e), file=sys.stderr)
+
+			config_name, config_id = e.split(".")
+			os_desc['config_name'] = config_name
+			os_desc['config_id'] = config_id
+			print("export_device_os_desc: config_name: %s config_id: %s" % (config_name, config_id), file=sys.stderr)
+
 		return os_desc
 
 	def export_devices(self, annotations=True):
