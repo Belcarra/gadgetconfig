@@ -37,16 +37,28 @@ class AddGadget(object):
 
 	def write_bytes(self, path, bytes):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
-		print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
-		intarray = [ int(b,0) for b in bytes]
+		#print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
+		intarray = [int(b, 0) for b in bytes]
 		binarray = bytearray(intarray)
-		print("write_bytes: %s" % (binarray), file=sys.stderr)
+		#print("write_bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
 		except (PermissionError):
-			print("%s %s PERMISSION DENIED" % (path, s.strip()), file=sys.stderr)
+			print("%s PERMISSION DENIED" % (path), file=sys.stderr)
+
+	def write_8bytes(self, path, s):
+		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
+		while len(s) < 8: s += '\0'
+		binarray = s.encode()
+		print("write_8bytes: %s" % (binarray), file=sys.stderr)
+		try:
+			f = open(path, "ab")
+			f.write(binarray)
+			f.close()
+		except (PermissionError):
+			print("%s PERMISSION DENIED" % (path), file=sys.stderr)
 
 	def makedirs(self, lpath, existsok=False):
 		self.vprint("makedirs: %s" % (lpath))
@@ -56,7 +68,6 @@ class AddGadget(object):
 			if existsok: return
 			print("makedirs: %s FileExistsError" % (lpath), file=sys.stderr)
 			exit(1)
-
 
 	def symlink(self, src, target):
 		self.vprint("symlink: %s -> %s" % (target, src))
@@ -102,21 +113,22 @@ class AddGadget(object):
 				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
 
 	# create_device_os_desc
-	# Create the Gadget Device os_descs directory, with symlink to
+	# Create the Gadget Device os_desc directory, with symlink to
 	# configuration.
 	def create_device_os_desc(self, path, device_definition):
 
+		print('create_device_os_desc: %s' % (device_definition))
 		try:
-			os_descs_dict = device_definition['os_descs']
+			os_descs_dict = device_definition['os_desc']
 		except (KeyError):
 			return
 
-		# print("create_device_os_descs_dict: %s" % (os_descs_dict), file=sys.stderr)
+		print("create_device_os_descs_dict: %s" % (os_descs_dict), file=sys.stderr)
 		if os_descs_dict is None:
 			return
 
 		lpath = "%s/os_desc" % (path)
-		self.makedirs(lpath)
+		self.makedirs(lpath, existsok=True)
 
 		# See if we have separate config_id and config_name, use
 		# to compose config name to build src and target paths.
@@ -151,8 +163,6 @@ class AddGadget(object):
 			if any(fnmatch.fnmatch(function_name, pattern) for pattern in exclude):
 				continue
 
-			#print("create_functions: %s type: %s %s" % (function_name, type(functions_dict[function_name]), functions_dict[function_name]), file=sys.stderr)
-
 			function_path = "%s/%s" % (functions_path, function_name)
 			function_dict = functions_dict[function_name]
 
@@ -165,20 +175,24 @@ class AddGadget(object):
 				print("****\ncreate_functions: %s" % (l), file=sys.stderr)
 				self.create_subfunctions("%s/%s" % (function_path, l), function_dict[l])
 
-			# os_descs is optional, may not be present
-			if 'os_descs' in function_dict:
-				function_os_descs = function_dict['os_descs']
+			# os_desc is optional, may not be present
+			if 'os_desc' in function_dict:
+				function_os_descs = function_dict['os_desc']
 				for interface in function_os_descs:
+					interface_ids = function_os_descs[interface]
 					ipath = "%s/os_desc/%s" % (function_path, interface)
-					# print("create_functions: ipath: %s" % (ipath), file=sys.stderr)
+					print("create_functions: ipath: %s" % (ipath), file=sys.stderr)
+					print("create_functions: %s" % (interface_ids), file=sys.stderr)
+
+					self.makedirs("%s/os_desc" % (function_path), existsok=True)
+					self.makedirs(ipath, existsok=True)
+					for id in ['compatible_id', 'sub_compatible_id']:
+						self.write_8bytes("%s/%s" % (ipath, id), interface_ids[id])
 
 			# report_descs is optional, typical hid only
 			if 'report_desc' in function_dict:
 				rpath = "%s/report_desc" % (function_path)
 				self.write_bytes(rpath, function_dict['report_desc'])
-
-
-
 
 	# create_configs
 	# Create the Gadget Device Configurations
@@ -226,5 +240,6 @@ class AddGadget(object):
 		self.create_strings(device_path, device_definition['strings'])
 		self.create_functions(device_path, device_definition['functions'])
 		self.create_configs(device_path, device_definition['configs'])
+		print('aaaa', file=sys.stderr)
 		self.create_device_os_desc(device_path, device_definition)
 
