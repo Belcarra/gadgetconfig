@@ -242,6 +242,7 @@ class ExportGadget(object):
 		# print("export_function_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
 		os_desc = {}
 		os_desc_entries = sorted(os.listdir(os_desc_path), key=str.casefold)
+
 		for entry in os_desc_entries:
 			epath = "%s/%s" % (os_desc_path, entry)
 			if os.path.isdir(epath) and not os.path.islink(epath) and fnmatch.fnmatch(entry, "interface.*"):
@@ -288,6 +289,14 @@ class ExportGadget(object):
 		os_desc = self.export_attributes(os_desc_path, symlinks=False)
 		print("export_device_os_desc: os_desc: %s" % (os_desc), file=sys.stderr)
 
+		if 'use' not in os_desc:
+			print("NO USE", file=sys.stderr)
+			return None
+		if os_desc['use'] != '1':
+			print("USE != 1", file=sys.stderr)
+			return None
+
+		print("USE == 1", file=sys.stderr)
 		for e in os.listdir(os_desc_path):
 			if not os.path.islink("%s/%s" % (os_desc_path, e)):
 				print("export_device_os_desc: e: %s NOT" % (e), file=sys.stderr)
@@ -336,9 +345,11 @@ class ExportGadget(object):
 					elif entry == 'functions':
 						pass
 					elif entry == 'os_desc':
-						device['# Microsoft OS Descriptors Support'] = ''
-						device['# C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)'] = ''
-						device[entry] = self.export_device_os_desc(epath)
+						os_desc = self.export_device_os_desc(epath)
+						if os_desc is not None:
+							device['# Microsoft OS Descriptors Support'] = ''
+							device['# C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)'] = ''
+							device[entry] = os_desc
 					elif entry == 'strings':
 						pass
 				elif os.path.islink(epath):

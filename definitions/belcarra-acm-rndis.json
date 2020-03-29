@@ -1,22 +1,22 @@
 # Gadget Device Definition File
-# 2020-03-17
+# 2020-03-29
 {
-    "belcarra-acm-rndis": {
+    "g1": {
         # USB Device Descriptor Fields
-        "idVendor": "0x15ec",
-        "idProduct": "0xf102",
-        "bcdDevice": "0x0100",
-        "bDeviceClass": "0xef",
-        "bDeviceSubClass": "0x02",
-        "bDeviceProtocol": "0x01",
+        "idVendor": "0x1d6b",
+        "idProduct": "0x0104",
+        "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
         "bcdUSB": "0x0200",
         "bMaxPacketSize0": "0x40",
         # USB Device Strings
         "strings": {
             "0x409": {
                 "serialnumber": "0123456789",
-                "product": "ACM-RNDIS Test",
-                "manufacturer": "Belcarra Technologies Corp"
+                "product": "Bar Gadget",
+                "manufacturer": "Foo Inc."
             }
         },
         # Gadget Functions list: see /sys/module/usb_f*,
@@ -24,47 +24,41 @@
         #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
         # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
         "functions": {
-            "acm.GS0": {},
             "rndis.usb0": {
                 "protocol": "00",
                 "subclass": "06",
                 "class": "02",
                 "qmult": "5",
-                "host_addr": "1a:55:89:a2:69:42",
-                "dev_addr": "1a:55:89:a2:69:41",
+                "host_addr": "f2:28:97:eb:fe:34",
+                "dev_addr": "5e:f9:7c:c7:89:b8",
                 "os_desc": {
                     "interface.rndis": {
-                        "sub_compatible_id": "",
-                        "compatible_id": ""
+                        "sub_compatible_id": "5162001",
+                        "compatible_id": "RNDIS"
                     }
                 }
             }
         },
         # Gadget Configurations list
         "configs": {
-            "config.1": {
+            "The only one.1": {
                 # Configuration Descriptor
                 # bmAttributes: bit 5 support remote wakeup
                 # bmAttributes: bit 6 self-powered
                 # bmAttributes: bit 7 bus-powered
                 # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
                 "bmAttributes": "0x80",
-                "MaxPower": "244",
+                "MaxPower": "2",
                 "strings": {
                     # USB Device Configuration Strings
                     "0x409": {
-                        "configuration": "Config 1"
+                        "configuration": "RNDIS"
                     }
                 },
                 # This determines the order in the Configuration descriptor
                 "functions": [
                     {
-                        # Host Match USB\VID_15EC&PID_F102&MI_00
-                        "name": "acm.GS0",
-                        "function": "acm.GS0"
-                    },
-                    {
-                        # Host Match USB\VID_15EC&PID_F102&MI_02
+                        # Host Match USB\VID_1D6B&PID_0104
                         "name": "rndis.usb0",
                         "function": "rndis.usb0"
                     }
@@ -74,9 +68,11 @@
         # Microsoft OS Descriptors Support
         # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
         "os_desc": {
-            "qw_sign": "",
-            "b_vendor_code": "0x00",
-            "use": "0"
+            "qw_sign": "MSFT100",
+            "b_vendor_code": "0xbc",
+            "use": "1",
+            "config_name": "The only one",
+            "config_id": "1"
         }
     }
 }
