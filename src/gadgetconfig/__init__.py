@@ -19,7 +19,7 @@ try:
 	from manage import ManageGadget
 	from remove import RemoveGadget
 	from prettyjson import prettyjson
-except ModuleNotFoundError:
+except (ImportError):
 	# from gadgetconfig.add import AddGadget
 	from gadgetconfig.export import ExportGadget
 	from gadgetconfig.manage import ManageGadget

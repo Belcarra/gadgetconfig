@@ -30,13 +30,9 @@ class AddGadget(object):
 		self.vprint("write_str: %s \"%s\"" % (path, s.strip()))
 		print("write_str: %s \"%s\"" % (path, s.strip()))
 		try:
-			print("aaaa", file=sys.stderr)
 			f = open(path, "a")
-			print("bbbb", file=sys.stderr)
 			f.writelines(s)
-			print("cccc", file=sys.stderr)
 			f.close()
-			print("dddd", file=sys.stderr)
 		except (PermissionError):
 			print("%s %s PERMISSION DENIED" % (path, s.strip()), file=sys.stderr)
 
@@ -137,7 +133,6 @@ class AddGadget(object):
 
 		if os_descs_dict['use'] != "1":
 			return
-			
 
 		lpath = "%s/os_desc" % (path)
 		self.makedirs(lpath, existsok=True)
@@ -252,6 +247,5 @@ class AddGadget(object):
 		self.create_strings(device_path, device_definition['strings'])
 		self.create_functions(device_path, device_definition['functions'])
 		self.create_configs(device_path, device_definition['configs'])
-		print('aaaa', file=sys.stderr)
 		self.create_device_os_desc(device_path, device_definition)
 
