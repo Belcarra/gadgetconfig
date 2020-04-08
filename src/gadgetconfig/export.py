@@ -73,7 +73,8 @@ class ExportGadget(object):
 			except (PermissionError, OSError):
 				return ''
 			except UnicodeDecodeError:
-				print('pathread: [UnicodeDecodeError]', file=sys.stderr)
+				# print('pathread: [UnicodeDecodeError]', file=sys.stderr)
+				pass
 
 			try:
 				f = open(path, "rb")
@@ -90,7 +91,7 @@ class ExportGadget(object):
 	def export_attribute_entry(self, path, entry, symlinks=False, exclude=[]):
 		if any(fnmatch.fnmatch(entry, pattern) for pattern in exclude):
 			return None
-		print("export_attributes: entry %s" % (entry), file=sys.stderr)
+		# print("export_attributes: entry %s" % (entry), file=sys.stderr)
 		epath = "%s/%s" % (path, entry)
 		if symlinks and os.path.islink(epath):
 			realpath = os.path.realpath(epath)
@@ -103,9 +104,9 @@ class ExportGadget(object):
 			a = []
 			for b in data:
 				a.append("0x%02x" % (b))
-			print("export_attribute_entry: b: %s" % (a), file=sys.stderr)
+			# print("export_attribute_entry: b: %s" % (a), file=sys.stderr)
 			return a
-		print("data: %s" % (data), file=sys.stderr)
+		# print("data: %s" % (data), file=sys.stderr)
 		if data is None or len(data) == 0:
 			return
 		return data[0].rstrip('\t\r\n\0')
@@ -204,19 +205,19 @@ class ExportGadget(object):
 
 			# config_entries = sorted(os.listdir(config_path), key=str.casefold)
 			config_dirents = sorted(os.scandir(config_path), key=lambda dirent: dirent.inode())
-			print("************\nexport_device_configs: config_entries %s" % (config_entries), file=sys.stderr)
+			# print("************\nexport_device_configs: config_entries %s" % (config_entries), file=sys.stderr)
 			num = 0
 			interface = 0
 			valid = True
 			idVendor = re.sub(r'0x(.*)', r'\1', idVendor)
 			idProduct = re.sub(r'0x(.*)', r'\1', idProduct)
-			print("****\nexport_device_configs: len(config_dirents) %s" % (len(config_dirents)), file=sys.stderr)
+			# print("****\nexport_device_configs: len(config_dirents) %s" % (len(config_dirents)), file=sys.stderr)
 			symlinks = 0
 			for dirent in config_dirents:
 				if dirent.is_symlink(): symlinks += 1
 			for dirent in config_dirents:
 				if dirent.is_symlink():
-					print("export_device_configs: name: %s" % (dirent.name), file=sys.stderr)
+					# print("export_device_configs: name: %s" % (dirent.name), file=sys.stderr)
 					if symlinks > 1:
 						a = "# Host Match USB\\VID_%s&PID_%s&MI_%02d" % (idVendor.upper(), idProduct.upper(), interface)
 					else:
@@ -264,7 +265,7 @@ class ExportGadget(object):
 					if entry == 'os_desc':
 						function[entry] = self.export_function_os_desc(epath)
 					if fnmatch.fnmatch(entry, 'lun.*'):
-						print("export_device_functions: %s" % (entry), file=sys.stderr)
+						# print("export_device_functions: %s" % (entry), file=sys.stderr)
 						function[entry] = self.export_attributes(epath)
 					continue
 				elif os.path.islink(epath):
@@ -285,28 +286,28 @@ class ExportGadget(object):
 		return functions
 
 	def export_device_os_desc(self, os_desc_path):
-		print("export_device_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
+		# print("export_device_os_desc: os_desc_path: %s" % (os_desc_path), file=sys.stderr)
 		os_desc = self.export_attributes(os_desc_path, symlinks=False)
-		print("export_device_os_desc: os_desc: %s" % (os_desc), file=sys.stderr)
+		# print("export_device_os_desc: os_desc: %s" % (os_desc), file=sys.stderr)
 
 		if 'use' not in os_desc:
-			print("NO USE", file=sys.stderr)
+			# print("NO USE", file=sys.stderr)
 			return None
 		if os_desc['use'] != '1':
-			print("USE != 1", file=sys.stderr)
+			# print("USE != 1", file=sys.stderr)
 			return None
 
-		print("USE == 1", file=sys.stderr)
+		# print("USE == 1", file=sys.stderr)
 		for e in os.listdir(os_desc_path):
 			if not os.path.islink("%s/%s" % (os_desc_path, e)):
-				print("export_device_os_desc: e: %s NOT" % (e), file=sys.stderr)
+				# print("export_device_os_desc: e: %s NOT" % (e), file=sys.stderr)
 				continue
-			print("export_device_os_desc: e: %s" % (e), file=sys.stderr)
+			# print("export_device_os_desc: e: %s" % (e), file=sys.stderr)
 
 			config_name, config_id = e.split(".")
 			os_desc['config_name'] = config_name
 			os_desc['config_id'] = config_id
-			print("export_device_os_desc: config_name: %s config_id: %s" % (config_name, config_id), file=sys.stderr)
+			# print("export_device_os_desc: config_name: %s config_id: %s" % (config_name, config_id), file=sys.stderr)
 
 		return os_desc
 
@@ -317,7 +318,7 @@ class ExportGadget(object):
 			device_path = "%s/%s" % (self.configpath, device_name)
 			device = self.export_attributes(device_path, exclude=['UDC'], idFlag=True,
 					annotation={'# USB Device Descriptor Fields': ''})
-			print("export_device: device: %s" % (device), file=sys.stderr)
+			# print("export_device: device: %s" % (device), file=sys.stderr)
 			# print("export_device: device_path: %s" % (device_path), file=sys.stderr)
 			device_entries = sorted(os.listdir(device_path), key=str.casefold)
 			if 'strings' in device_entries:

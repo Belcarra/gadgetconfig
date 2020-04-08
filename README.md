@@ -160,6 +160,85 @@ presented to the host during enumeration.
 
 This is sample file:
 ```
+# Gadget Device Definition File
+# 2020-03-17
+{
+    "belcarra-acm-ecm": {
+        # USB Device Descriptor Fields
+        "idVendor": "0x15ec",
+        "idProduct": "0xf102",
+        "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
+        "bcdUSB": "0x0200",
+        "bMaxPacketSize0": "0x40",
+        # USB Device Strings
+        "strings": {
+            "0x409": {
+                "serialnumber": "0123456789",
+                "product": "ACMx2-ECM Gadget",
+                "manufacturer": "Belcarra Technologies Corp"
+            }
+        },
+        # Gadget Functions list: see /sys/module/usb_f*,
+        # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+        #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+        # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
+        "functions": {
+            "acm.GS0": {},
+            "acm.GS1": {},
+            "ecm.usb0": {
+                "qmult": "5",
+                "host_addr": "c6:34:7c:45:a6:c5",
+                "dev_addr": "0e:6a:8a:85:db:76"
+            }
+        },
+        # Gadget Configurations list
+        "configs": {
+            "config.1": {
+                # Configuration Descriptor
+                # bmAttributes: bit 5 support remote wakeup
+                # bmAttributes: bit 6 self-powered
+                # bmAttributes: bit 7 bus-powered
+                # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
+                "bmAttributes": "0x80",
+                "MaxPower": "2",
+                "strings": {
+                    # USB Device Configuration Strings
+                    "0x409": {
+                        "configuration": "CDC 2xACM+ECM"
+                    }
+                },
+                # This determines the order in the Configuration descriptor
+                "functions": [
+                    {
+                        # Host Match USB\VID_15EC&PID_F102&MI_00
+                        "name": "acm.GS0",
+                        "function": "acm.GS0"
+                    },
+                    {
+                        # Host Match USB\VID_15EC&PID_F102&MI_02
+                        "name": "ecm.usb0",
+                        "function": "ecm.usb0"
+                    },
+                    {
+                        # Host Match USB\VID_15EC&PID_F102&MI_04
+                        "name": "acm.GS1",
+                        "function": "acm.GS1"
+                    }
+                ]
+            }
+        },
+        # Microsoft OS Descriptors Support
+        # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
+        "os_desc": {
+            "qw_sign": "",
+            "b_vendor_code": "0x00",
+            "use": "0"
+        }
+    }
+}
 
 ```
 We can view the generated Gadget ConfigFS using *sysfstree_raspian*:

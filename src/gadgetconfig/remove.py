@@ -105,7 +105,7 @@ class RemoveGadget(object):
 		#
 		configs_path = "%s/configs" % (device_path)
 		for c in self.listdir(configs_path):
-			print("remove_device: config: %s" % (c))
+			# print("remove_device: config: %s" % (c))
 
 			# 1.
 			config_path = "%s/%s" % (configs_path, c)
