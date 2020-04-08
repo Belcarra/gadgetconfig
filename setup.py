@@ -6,7 +6,7 @@ def main():
 
     setup(
         name='gadgetconfig',
-        packages=['gadgetconfig'],
+        packages=['gadgetconfig', 'gadgetapp'],
         package_dir={'': 'src'},
         version=open('VERSION.txt').read().strip(),
         author='Stuart Lynne',
@@ -16,8 +16,8 @@ def main():
         license='MIT',
         keywords=['usb', 'gadget'],
         description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
-        entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', ], },
-        install_requires=["argparse", "commentjson", "prettyjson", "scandir"],
+        entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', 'gadgetapp = gadgetapp:main' ], },
+        install_requires=["argparse", "commentjson", "prettyjson", "scandir", "inotify", "termcolor", "python-magic", "sysfstree", "gadgetconfig"],
         classifiers=[
             "Programming Language :: Python",
             "Development Status :: 3 - Alpha",
