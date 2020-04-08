@@ -23,17 +23,23 @@ except ModuleNotFoundError:
 
 class ManageGadget(object):
 
-	def __init__(self, configpath, test=False):
+	def __init__(self, configpath, test=False, verbose=False):
 		self.configpath = configpath
 		self.udcpath = "/sys/class/udc"
 		self.realudcpath = ''
 		self.udclist = []
 		self.test = test
 		self.configured_device = ''
+		self.verbose = verbose
+		# print("ManageGadget: verbose: %s" % (verbose))
 
-		self.checkfs(verbose=True)
-		self.find_udcs(verbose=True)
-		self.check_current(verbose=True)
+		self.checkfs(verbose=verbose)
+		self.find_udcs(verbose=verbose)
+		self.check_current(verbose=verbose)
+
+	def vprint(self, s):
+		if self.verbose:
+			print(s, file=sys.stderr)
 
 	def pathread(self, path):
 
@@ -101,7 +107,7 @@ class ManageGadget(object):
 	def _query_gadget(self, all=False):
 		gadgets = []
 		dirs = os.listdir(self.configpath)
-		self.vprint(True, "Current Gadget configurations")
+		self.vprint(False, "Current Gadget configurations")
 		if len(dirs) == 0:
 			return gadgets
 		for d in dirs:
@@ -133,7 +139,7 @@ class ManageGadget(object):
 	def query_gadgets(self):
 		gadgets = []
 		dirs = os.listdir(self.configpath)
-		self.vprint(True, "Current Gadget configurations")
+		self.vprint(False, "Current Gadget configurations")
 		if len(dirs) == 0:
 			return gadgets
 		for d in dirs:
@@ -294,18 +300,18 @@ class ManageGadget(object):
 				self.replace(v, match, repl)
 
 	def add_device_file(self, pathname, new_device_name=None, args=None):
-		print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
-		a = AddGadget(self.configpath)
+		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
+		a = AddGadget(self.configpath, verbose=self.verbose)
 		try:
 			f = io.open(pathname)
 		except (FileNotFoundError):
-			print("add_device_file: File Not Found Error", file=sys.stderr)
+			self.vprint("add_device_file: File Not Found Error", file=sys.stderr)
 			exit(1)
 		try:
 			device_definitions = commentjson.load(f)
 		# except (UnexpectedCharacters):
 		except:
-			print("add_device_file: Unexpected Characters")
+			self.vprint("add_device_file: Unexpected Characters")
 			exit(1)
 
 		for definition_name in device_definitions:

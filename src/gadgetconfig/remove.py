@@ -11,6 +11,7 @@
 #
 
 import os
+import sys
 import fnmatch
 
 """remove.py: ..."""
@@ -20,29 +21,34 @@ import fnmatch
 
 class RemoveGadget(object):
 
-	def __init__(self, configpath, manage):
+	def __init__(self, configpath, manage, verbose):
 		self.configpath = configpath
 		self.m = manage
+		self.verbose = verbose
+
+	def vprint(self, s):
+		if self.verbose:
+			print(s, file=sys.stderr)
 
 	def rmdir(self, path):
 		if not os.path.isdir(path):
-			print("rmdir: %s NOT A DIR" % (path))
+			self.vprint("rmdir: %s NOT A DIR" % (path))
 			return
-		print("rmdir: %s" % (path))
+		self.vprint("rmdir: %s" % (path))
 		os.rmdir(path)
 
 	def unlink(self, path):
 		if not os.path.islink(path):
-			print("rmdir: %s NOT A SYMLINK" % (path))
+			self.vprint("rmdir: %s NOT A SYMLINK" % (path))
 			return
-		print("unlink: %s" % (path))
+		self.vprint("unlink: %s" % (path))
 		os.unlink(path)
 
 	def listdir(self, path):
 		if not os.path.isdir(path):
-			print("listdir: %s NOT A DIR" % (path))
+			self.vprint("listdir: %s NOT A DIR" % (path))
 			return
-		print("listdir: %s" % (path))
+		self.vprint("listdir: %s" % (path))
 		return os.listdir(path)
 
 	def remove_strings(self, path):

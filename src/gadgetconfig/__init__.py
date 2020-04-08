@@ -55,6 +55,7 @@ def main():
 	group.add_argument("--add", type=str, help="Add Gadget device definitions from JSON file", default=None)
 	group.add_argument("--remove", type=str, help="Remove Named Gadget device definition\n \n", default=None)
 	# group.add_argument("-R", "--remove", nargs='?', type=str, help='Remove Gadget device definition', default=None)
+	group.add_argument("--remove-all", help="Remove All Gadget device definitions", action='store_true')
 
 	group.add_argument("--enable", type=str, help="enable specified Gadget Device", default=None)
 	group.add_argument("--disable", help="disable currently enabled Gadget Device", action='store_true')
@@ -84,18 +85,19 @@ def main():
 	parser.add_argument("--name", nargs='?', type=str, help='device name override', default=None)
 	# parser.add_argument("-I", "--id", nargs='?', type=int, help='enable ID', default=1)
 	parser.add_argument("--test", action='store_true')
+	parser.add_argument("--verbose", action='store_true')
 
 	args = parser.parse_args()
 
-	# print("args: %s" % (args), file=sys.stderr)
-	# print("", file=sys.stderr)
+	print("args: %s" % (args), file=sys.stderr)
+	print("", file=sys.stderr)
 
 	if args.test:
 		sys_config_path = "sys/kernel/config/usb_gadget"
 	else:
 		sys_config_path = "/sys/kernel/config/usb_gadget"
 
-	m = ManageGadget(sys_config_path)
+	m = ManageGadget(sys_config_path, verbose=args.verbose)
 	if args.query_gadget:
 		print("Currently configured: %s" % (m.query_gadget_verbose()), file=sys.stderr)
 		exit(0)
@@ -120,7 +122,7 @@ def main():
 		print("UDC Function: %s" % (m.query_gadget_functions()), file=sys.stderr)
 		exit(0)
 
-	m = ManageGadget(sys_config_path, test=args.test)
+	# m = ManageGadget(sys_config_path, test=args.test)
 	#if not m.checkfs(verbose=False):
 	#	if not args.test:
 	#		exit(1)
@@ -157,12 +159,20 @@ def main():
 
 		exit(0)
 
+	if args.remove_all:
+		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
+		for g in m.query_gadgets():
+			print("Remove %s" % (g), file=sys.stderr)
+			r.remove_device(g)
+		exit(0)
+
 	if args.remove is not None:
-		r = RemoveGadget(sys_config_path, m)
+		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		r.remove_device(args.remove)
 		exit(0)
 
 	if args.add is not None:
+		print('add %s' % (args.name))
 		m.add_device_file(args.add, new_device_name=args.name, args=args)
 
 	exit(1)

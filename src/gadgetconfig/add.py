@@ -20,6 +20,7 @@ class AddGadget(object):
 	def __init__(self, configpath, verbose=False):
 		self.configpath = configpath
 		self.verbose = verbose
+		# print("AddGadget: verbose: %s" % (verbose))
 		# self.verbose = True
 
 	def vprint(self, s):
@@ -28,38 +29,37 @@ class AddGadget(object):
 
 	def write_str(self, path, s):
 		self.vprint("write_str: %s \"%s\"" % (path, s.strip()))
-		print("write_str: %s \"%s\"" % (path, s.strip()))
 		try:
 			f = open(path, "a")
 			f.writelines(s)
 			f.close()
 		except (PermissionError):
-			print("%s %s PERMISSION DENIED" % (path, s.strip()), file=sys.stderr)
+			self.vprint("%s %s PERMISSION DENIED" % (path, s.strip()))
 
 	def write_bytes(self, path, bytes):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
-		#print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
+		# print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
 		intarray = [int(b, 0) for b in bytes]
 		binarray = bytearray(intarray)
-		#print("write_bytes: %s" % (binarray), file=sys.stderr)
+		# print("write_bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
 		except (PermissionError):
-			print("%s PERMISSION DENIED" % (path), file=sys.stderr)
+			self.vprint("%s PERMISSION DENIED" % (path))
 
 	def write_8bytes(self, path, s):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
 		while len(s) < 8: s += '\0'
 		binarray = s.encode()
-		print("write_8bytes: %s" % (binarray), file=sys.stderr)
+		# print("write_8bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
 		except (PermissionError):
-			print("%s PERMISSION DENIED" % (path), file=sys.stderr)
+			self.vprint("%s PERMISSION DENIED" % (path))
 
 	def makedirs(self, lpath, existsok=False):
 		self.vprint("makedirs: %s" % (lpath))
@@ -67,7 +67,7 @@ class AddGadget(object):
 			os.makedirs(lpath)
 		except (FileExistsError):
 			if existsok: return
-			print("makedirs: %s FileExistsError" % (lpath), file=sys.stderr)
+			self.vprint("makedirs: %s FileExistsError" % (lpath))
 			exit(1)
 
 	def symlink(self, src, target):
@@ -118,13 +118,13 @@ class AddGadget(object):
 	# configuration.
 	def create_device_os_desc(self, path, device_definition):
 
-		print('create_device_os_desc: %s' % (device_definition))
+		# print('create_device_os_desc: %s' % (device_definition))
 		try:
 			os_descs_dict = device_definition['os_desc']
 		except (KeyError):
 			return
 
-		print("create_device_os_descs_dict: %s" % (os_descs_dict), file=sys.stderr)
+		# print("create_device_os_descs_dict: %s" % (os_descs_dict), file=sys.stderr)
 		if os_descs_dict is None:
 			return
 
@@ -179,7 +179,7 @@ class AddGadget(object):
 			# mass storage has sub lun.0...lun.N directories
 			for l in function_dict:
 				if not fnmatch.fnmatch(l, 'lun.*'): continue
-				print("****\ncreate_functions: %s" % (l), file=sys.stderr)
+				# print("****\ncreate_functions: %s" % (l), file=sys.stderr)
 				self.create_subfunctions("%s/%s" % (function_path, l), function_dict[l])
 
 			# os_desc is optional, may not be present
@@ -188,8 +188,8 @@ class AddGadget(object):
 				for interface in function_os_descs:
 					interface_ids = function_os_descs[interface]
 					ipath = "%s/os_desc/%s" % (function_path, interface)
-					print("create_functions: ipath: %s" % (ipath), file=sys.stderr)
-					print("create_functions: %s" % (interface_ids), file=sys.stderr)
+					# print("create_functions: ipath: %s" % (ipath), file=sys.stderr)
+					# print("create_functions: %s" % (interface_ids), file=sys.stderr)
 
 					self.makedirs("%s/os_desc" % (function_path), existsok=True)
 					self.makedirs(ipath, existsok=True)
