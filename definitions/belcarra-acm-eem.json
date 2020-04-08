@@ -1,5 +1,5 @@
 # Gadget Device Definition File
-# 2020-03-17
+# 2020-04-07
 {
     "belcarra-acm-eem": {
         # USB Device Descriptor Fields
@@ -67,13 +67,6 @@
                     }
                 ]
             }
-        },
-        # Microsoft OS Descriptors Support
-        # C.f. https://docs.microsoft.com/en-us/previous-versions/gg463179(v=msdn.10)
-        "os_desc": {
-            "qw_sign": "",
-            "b_vendor_code": "0x00",
-            "use": "0"
         }
     }
 }
