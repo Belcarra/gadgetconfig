@@ -5,7 +5,7 @@
 The *gadgetapp* is a simple GUI application that can be used to configure and enable Gadget USB Device configurations.
 
 
-![GadgetApp Screenshot](file:gadgetapp.png) "Screen Shot"
+![GadgetApp Screenshot](file:docs/gadgetapp.png) "Screen Shot"
 
 
 ## Installation
