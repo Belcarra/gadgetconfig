@@ -77,7 +77,7 @@ See below for more information on Gadget Device Definition files.
 
 The *gadgetconfig* program uses USB Device definitions stored in *JSON* files.
 
-Gadget Libcomposite:
+When using the Gadget Libcomposite module:
 
 - Create: *gadgetconfig --create gadget-definition.json*
 - Enable: *gadgetconfig --enable configuration_name*
@@ -87,7 +87,6 @@ Gadget Libcomposite:
 Gadget UDC:
 - Disconnect: *gadgetconfig --soft_connect disconnect*
 - Connect: *gadgetconfig --soft_connect connect*
-
 
 ```
             +-------------------+
@@ -220,9 +219,9 @@ This is sample file:
 }
 
 ```
-We can view the generated Gadget ConfigFS using *sysfstree_raspian*:
+We can view the generated Gadget ConfigFS using *sysfstree*:
 ```
-# gadgetconfig --create belcarra-2acm+ecm.json
+# gadgetconfig --add belcarra-2acm+ecm.json
 # sysfstree_raspbian --gadget
 [/sys/kernel/config/usb_gadget]
 └──[belcarra]
