@@ -104,12 +104,12 @@ class AddGadget(object):
 	# ignoring dictionary entries with values that are not int or str.
 	#
 	def add_attrs(self, path, dict, exclude=[]):
-		# print("add_attrs: path: %s dict: %s" % (path, dict), file=sys.stderr)
+		#print("add_attrs: path: %s dict: %s" % (path, dict), file=sys.stderr)
 		exclude.append("#*")
 		for a in dict:
 			if any(fnmatch.fnmatch(a, pattern) for pattern in exclude):
 				continue
-			# print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])), file=sys.stderr)
+			#print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])), file=sys.stderr)
 			if isinstance(dict[a], (int, str)):
 				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
 

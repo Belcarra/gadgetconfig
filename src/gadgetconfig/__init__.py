@@ -49,26 +49,30 @@ def main():
 	# parser.add_argument("-2", "--scheme2json", help="Scheme Attr to JSON", action='store_true')
 	# parser.add_argument("-S", "--scheme", help="Scheme Attr to JSON", action='store_true')
 
-	group = parser.add_mutually_exclusive_group(required=False)
+	soft = parser.add_mutually_exclusive_group(required=False)
+	soft.add_argument("--soft-disconnect", help="Disconnect or detach the UDC", action='store_true')
+	soft.add_argument("--soft-connect", help="Connect or attach the UDC", action='store_true')
 
-	group.add_argument("--export", help="Export JSON to STDOUT", action='store_true')
-	group.add_argument("--add", type=str, help="Add Gadget device definitions from JSON file", default=None)
-	group.add_argument("--remove", type=str, help="Remove Named Gadget device definition\n \n", default=None)
-	# group.add_argument("-R", "--remove", nargs='?', type=str, help='Remove Gadget device definition', default=None)
-	group.add_argument("--remove-all", help="Remove All Gadget device definitions", action='store_true')
+	remove = parser.add_mutually_exclusive_group(required=False)
+	remove.add_argument("--remove", type=str, help="Remove Named Gadget device definition\n \n", default=None)
+	remove.add_argument("--remove-all", help="Remove All Gadget device definitions", action='store_true')
 
-	group.add_argument("--enable", type=str, help="enable specified Gadget Device", default=None)
-	group.add_argument("--disable", help="disable currently enabled Gadget Device", action='store_true')
-	group.add_argument("--query-gadget", help="display currently enabled Gadget Device", action='store_true')
-	group.add_argument("--query-gadgets", help="display current Gadget Devices\n \n", action='store_true')
-	group.add_argument("--query-gadget-functions", help="display current Gadgets functions\n \n", action='store_true')
 
-	parser.add_argument("--soft-disconnect", help="Disconnect or detach the UDC", action='store_true')
-	parser.add_argument("--soft-connect", help="Connect or attach the UDC", action='store_true')
+	#group = parser.add_mutually_exclusive_group(required=False)
+
+	parser.add_argument("--export", help="Export JSON to STDOUT", action='store_true')
+	parser.add_argument("--add", type=str, help="Add Gadget device definitions from JSON file", default=None)
+
+	parser.add_argument("--enable", type=str, help="enable specified Gadget Device", default=None)
+	parser.add_argument("--disable", help="disable currently enabled Gadget Device", action='store_true')
+	parser.add_argument("--query-gadget", help="display currently enabled Gadget Device", action='store_true')
+	parser.add_argument("--query-gadgets", help="display current Gadget Devices\n \n", action='store_true')
+	parser.add_argument("--query-gadget-functions", help="display current Gadgets functions\n \n", action='store_true')
+
 	#group.add_argument("--query-soft-connect", help="display current UDC Soft-Connect status", action='store_true')
-	group.add_argument("--query-udc", help="display current UDC function and state", action='store_true')
-	group.add_argument("--query-udc-state", help="display current UDC state", action='store_true')
-	group.add_argument("--query-udc-function", help="display current UDC function\n \n", action='store_true')
+	parser.add_argument("--query-udc", help="display current UDC function and state", action='store_true')
+	parser.add_argument("--query-udc-state", help="display current UDC state", action='store_true')
+	parser.add_argument("--query-udc-function", help="display current UDC function\n \n", action='store_true')
 
 	# group.add_argument("path", metavar='path', nargs='?', type=str, help="Gadget Device Scheme", default=None)
 
@@ -131,10 +135,6 @@ def main():
 	# m.find_udcs(verbose=True)
 	# m.check_current(verbose=False)
 
-	if args.disable:
-		m.disable_current()
-		exit(0)
-
 	if args.enable is not None:
 		m.enable_current(args.enable)
 		exit(0)
@@ -159,17 +159,18 @@ def main():
 
 		exit(0)
 
+	if args.disable:
+		m.disable_current()
+
 	if args.remove_all:
 		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		for g in m.query_gadgets():
 			print("Remove %s" % (g), file=sys.stderr)
 			r.remove_device(g)
-		exit(0)
 
 	if args.remove is not None:
 		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		r.remove_device(args.remove)
-		exit(0)
 
 	if args.add is not None:
 		print('add %s' % (args.name))

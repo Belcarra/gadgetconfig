@@ -320,7 +320,7 @@ class ManageGadget(object):
 				device_name = new_device_name
 			else:
 				device_name = definition_name
-			# print('device_name: %s' % (device_name))
+			print('device_definition: %s' % (device_definition), file=sys.stderr)
 			if device_name in self.query_gadgets():
 				# print("add_device_file: %s already defined" % (device_name))
 				continue
