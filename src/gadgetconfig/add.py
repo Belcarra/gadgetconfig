@@ -17,18 +17,33 @@ import fnmatch
 
 class AddGadget(object):
 
-	def __init__(self, configpath, verbose=False):
+	def __init__(self, configpath, pathname=None, verbose=False, sh=False, enable=False):
 		self.configpath = configpath
+		self.sh = sh
+		self.enable = enable
+		self.pathname = pathname
 		self.verbose = verbose
-		# print("AddGadget: verbose: %s" % (verbose))
+		#print("AddGadget: sh: %s" % (sh), file=sys.stderr)
+		#print("AddGadget: verbose: %s" % (verbose), file=sys.stderr)
 		# self.verbose = True
 
 	def vprint(self, s):
 		if self.verbose:
 			print(s, file=sys.stderr)
 
+	def echo(self, path, s):
+		print("echo \"%s\" > \"%s\"" % (s.strip(), path), file=sys.stdout)
+
+	def echobin(self, path, binarray):
+		bytes = [ "\\\\x%02x" % (b) for b in binarray ]
+		s = "".join(map(str, bytes))
+		print("echo -ne \"%s\" > \"%s\"" % (s, path), file=sys.stdout)
+
 	def write_str(self, path, s):
 		self.vprint("write_str: %s \"%s\"" % (path, s.strip()))
+		if self.sh:
+			self.echo(path, s)
+			return
 		try:
 			f = open(path, "a")
 			f.writelines(s)
@@ -41,6 +56,9 @@ class AddGadget(object):
 		# print("write_bytes: %s \"%s\"" % (path, bytes), file=sys.stderr)
 		intarray = [int(b, 0) for b in bytes]
 		binarray = bytearray(intarray)
+		if self.sh:
+			self.echobin(path, binarray)
+			return
 		# print("write_bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
@@ -53,6 +71,9 @@ class AddGadget(object):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
 		while len(s) < 8: s += '\0'
 		binarray = s.encode()
+		if self.sh:
+			self.echobin(path, binarray)
+			return
 		# print("write_8bytes: %s" % (binarray), file=sys.stderr)
 		try:
 			f = open(path, "ab")
@@ -63,6 +84,9 @@ class AddGadget(object):
 
 	def makedirs(self, lpath, existsok=False):
 		self.vprint("makedirs: %s" % (lpath))
+		if self.sh:
+			print("mkdir -p \"%s\"" % (lpath), file=sys.stdout)
+			return
 		try:
 			os.makedirs(lpath)
 		except (FileExistsError):
@@ -71,6 +95,9 @@ class AddGadget(object):
 			exit(1)
 
 	def symlink(self, src, target):
+		if self.sh:
+			print("ln -s \"%s\" \"%s\"" % (src, target), file=sys.stdout)
+			return
 		self.vprint("symlink: %s -> %s" % (target, src))
 		os.symlink(src, target)
 
@@ -235,6 +262,12 @@ class AddGadget(object):
 	# Create a Gadget Device definition from saved json configuratiion
 	#
 	def add_device_json(self, device_definition, device_name=None):
+
+		if self.sh:
+			print("#!/bin/sh", file=sys.stdout)
+			print("# Created from %s\n" % (self.pathname), file=sys.stdout)
+
+		print("add_device_json", file=sys.stderr)
 		device_path = "%s/%s" % (self.configpath, device_name)
 		self.makedirs(device_path)
 
@@ -248,4 +281,7 @@ class AddGadget(object):
 		self.create_functions(device_path, device_definition['functions'])
 		self.create_configs(device_path, device_definition['configs'])
 		self.create_device_os_desc(device_path, device_definition)
+
+		if self.sh and self.enable:
+			print("\nbasename /sys/class/udc/* > %s/UDC" % (device_path))
 

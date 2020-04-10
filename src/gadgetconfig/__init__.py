@@ -62,6 +62,8 @@ def main():
 
 	parser.add_argument("--export", help="Export JSON to STDOUT", action='store_true')
 	parser.add_argument("--add", type=str, help="Add Gadget device definitions from JSON file", default=None)
+	parser.add_argument("--sh", type=str, help="Create shell script from Gadget device definitions from JSON file", default=None)
+	parser.add_argument("--sh-auto", type=str, help="Create shell script with enable from Gadget device definitions from JSON file", default=None)
 
 	parser.add_argument("--enable", type=str, help="enable specified Gadget Device", default=None)
 	parser.add_argument("--disable", help="disable currently enabled Gadget Device", action='store_true')
@@ -93,8 +95,8 @@ def main():
 
 	args = parser.parse_args()
 
-	print("args: %s" % (args), file=sys.stderr)
-	print("", file=sys.stderr)
+	# print("args: %s" % (args), file=sys.stderr)
+	# print("", file=sys.stderr)
 
 	if args.test:
 		sys_config_path = "sys/kernel/config/usb_gadget"
@@ -172,8 +174,17 @@ def main():
 		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		r.remove_device(args.remove)
 
+	if args.sh is not None:
+		# print('add %s' % (args.name))
+		m.add_device_file(args.sh, new_device_name=args.name, args=args, sh=True)
+		exit(0)
+
+	if args.sh_auto:
+		m.add_device_file(args.sh_auto, new_device_name=args.name, args=args, sh=True, enable=True)
+		exit(0)
+
 	if args.add is not None:
-		print('add %s' % (args.name))
+		# print('add %s' % (args.name))
 		m.add_device_file(args.add, new_device_name=args.name, args=args)
 
 	exit(1)

@@ -299,9 +299,9 @@ class ManageGadget(object):
 					data[k] = repl
 				self.replace(v, match, repl)
 
-	def add_device_file(self, pathname, new_device_name=None, args=None):
-		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name))
-		a = AddGadget(self.configpath, verbose=self.verbose)
+	def add_device_file(self, pathname, new_device_name=None, args=None, sh=False, enable=False):
+		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name), file=sys.stdeff)
+		a = AddGadget(self.configpath, pathname=pathname, verbose=self.verbose, sh=sh, enable=enable)
 		try:
 			f = io.open(pathname)
 		except (FileNotFoundError):
@@ -321,7 +321,7 @@ class ManageGadget(object):
 			else:
 				device_name = definition_name
 			print('device_definition: %s' % (device_definition), file=sys.stderr)
-			if device_name in self.query_gadgets():
+			if not sh and device_name in self.query_gadgets():
 				# print("add_device_file: %s already defined" % (device_name))
 				continue
 
