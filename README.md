@@ -1,6 +1,6 @@
 # Gadget Config
 ## Stuart Lynne 
-## Sun Mar 01 13:36:16 PST 2020 
+## Thu Apr 09 23:46:27 PDT 2020 
 
 This package contains tools for configuring Gadget USB Devices and integrating with *systemd*.
 
@@ -241,9 +241,9 @@ This is sample file:
 }
 
 ```
-We can view the generated Gadget ConfigFS using *sysfstree_raspian*:
+We can view the generated Gadget ConfigFS using *sysfstree*:
 ```
-# gadgetconfig --create belcarra-2acm+ecm.json
+# gadgetconfig --add belcarra-2acm+ecm.json
 # sysfstree_raspbian --gadget
 [/sys/kernel/config/usb_gadget]
 └──[belcarra]
@@ -286,6 +286,48 @@ We can view the generated Gadget ConfigFS using *sysfstree_raspian*:
     │       ├──serialnumber: 0123456789
     ├──UDC: fe980000.usb
 ```
+
+## Shell script
+
+To facilitate installing Gadget definitions in an early boot environment a Gadget Definition file
+can be converted to a simple shell script:
+```
+    gadgetconfig --sh-auto definitions/hid-example.json > hid-example.sh
+```
+Would produce:
+```
+    #!/bin/sh
+    # Created from definitions/hid-example.json
+
+    mkdir -p "/sys/kernel/config/usb_gadget/g2"
+    echo "0x1d6b" > "/sys/kernel/config/usb_gadget/g2/idVendor"
+    echo "0x0104" > "/sys/kernel/config/usb_gadget/g2/idProduct"
+    echo "0x0001" > "/sys/kernel/config/usb_gadget/g2/bcdDevice"
+    echo "0x00" > "/sys/kernel/config/usb_gadget/g2/bDeviceClass"
+    echo "0x00" > "/sys/kernel/config/usb_gadget/g2/bDeviceSubClass"
+    echo "0x00" > "/sys/kernel/config/usb_gadget/g2/bDeviceProtocol"
+    echo "0x0200" > "/sys/kernel/config/usb_gadget/g2/bcdUSB"
+    echo "0x40" > "/sys/kernel/config/usb_gadget/g2/bMaxPacketSize0"
+    mkdir -p "/sys/kernel/config/usb_gadget/g2/strings/0x409"
+    echo "0123456789" > "/sys/kernel/config/usb_gadget/g2/strings/0x409/serialnumber"
+    echo "Bar Gadget" > "/sys/kernel/config/usb_gadget/g2/strings/0x409/product"
+    echo "Foo Inc." > "/sys/kernel/config/usb_gadget/g2/strings/0x409/manufacturer"
+    mkdir -p "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0"
+    echo "235:0" > "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0/dev"
+    echo "8" > "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0/report_length"
+    echo "1" > "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0/protocol"
+    echo "0" > "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0/subclass"
+    echo -ne "\\x05\\x01\\x09\\x06\\xa1\\x01\\x05\\x07\\x19\\xe0\\x29\\xe7\\x15\\x00\\x25\\x01\\x75\\x01\\x95\\x08\\x81\\x02\\x95\\x01\\x75\\x08\\x81\\x03\\x95\\x05\\x75\\x01\\x05\\x08\\x19\\x01\\x29\\x05\\x91\\x02\\x95\\x01\\x75\\x03\\x91\\x03\\x95\\x06\\x75\\x08\\x15\\x00\\x25\\x65\\x05\\x07\\x19\\x00\\x29\\x65\\x81\\x00\\xc0" > "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0/report_desc"
+    mkdir -p "/sys/kernel/config/usb_gadget/g2/configs/The only one.1"
+    echo "0x80" > "/sys/kernel/config/usb_gadget/g2/configs/The only one.1/bmAttributes"
+    echo "2" > "/sys/kernel/config/usb_gadget/g2/configs/The only one.1/MaxPower"
+    mkdir -p "/sys/kernel/config/usb_gadget/g2/configs/The only one.1/strings/0x409"
+    echo "1xHID" > "/sys/kernel/config/usb_gadget/g2/configs/The only one.1/strings/0x409/configuration"
+    ln -s "/sys/kernel/config/usb_gadget/g2/functions/hid.usb0" "/sys/kernel/config/usb_gadget/g2/configs/The only one.1/some_name"
+
+    basename /sys/class/udc/* > /sys/kernel/config/usb_gadget/g2/UDC
+```
+
 
 
 ## Running Tests
