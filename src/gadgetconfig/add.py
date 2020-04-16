@@ -32,6 +32,7 @@ class AddGadget(object):
 			print(s, file=sys.stderr)
 
 	def echo(self, path, s):
+		self.vprint("echo: %s \"%s\"" % (s, path))
 		print("echo \"%s\" > \"%s\"" % (s.strip(), path), file=sys.stdout)
 
 	def echobin(self, path, binarray):
@@ -40,10 +41,7 @@ class AddGadget(object):
 		print("echo -ne \"%s\" > \"%s\"" % (s, path), file=sys.stdout)
 
 	def write_str(self, path, s):
-		self.vprint("write_str: %s \"%s\"" % (path, s.strip()))
-		if self.sh:
-			self.echo(path, s)
-			return
+		self.vprint("write_str: %s \"%s\"" % (s.strip(), path))
 		try:
 			f = open(path, "a")
 			f.writelines(s)
@@ -103,9 +101,9 @@ class AddGadget(object):
 
 	def hex_or_str(self, v):
 		if isinstance(v, (int)):
-			return "0x%02x\n" % v
+			return "0x%02x" % v
 		else:
-			return "%s\n" % v
+			return "%s" % v
 
 	# create_strings
 	# For each language create a stings/lang directory containing
@@ -124,7 +122,10 @@ class AddGadget(object):
 			self.makedirs(spath)
 			string_dict = string_dicts[lang]
 			for s in string_dict:
-				self.write_str("%s/%s" % (spath, s), "%s\n" % string_dict[s])
+				if self.sh:
+					self.echo("%s/%s" % (spath, s), "${%s:-%s}" % (s, string_dict[s]))
+				else:
+					self.write_str("%s/%s" % (spath, s), string_dict[s])
 
 	# add_attrs
 	# Add misc attributes to a path, convert ints to hex strings,
@@ -138,7 +139,10 @@ class AddGadget(object):
 				continue
 			#print("add_attrs: path: %s %s type: %s" % (path, a, type(dict[a])), file=sys.stderr)
 			if isinstance(dict[a], (int, str)):
-				self.write_str("%s/%s" % (path, a), self.hex_or_str(dict[a]))
+				if self.sh:
+					self.echo("%s/%s" % (path, a), "${%s:-%s}" % (a, self.hex_or_str(dict[a])))
+				else:
+					self.write_str("%s/%s" % (path, a), "%s\n" % (self.hex_or_str(dict[a])))
 
 	# create_device_os_desc
 	# Create the Gadget Device os_desc directory, with symlink to
@@ -263,11 +267,13 @@ class AddGadget(object):
 	#
 	def add_device_json(self, device_definition, device_name=None):
 
+		self.vprint("add_device_json: %s" % (device_definition))
 		if self.sh:
 			print("#!/bin/sh", file=sys.stdout)
 			print("# Created from %s\n" % (self.pathname), file=sys.stdout)
+			print("# Usage: manufacturer=$1 scriptname.sh", file=sys.stdout)
+			print("", file=sys.stdout)
 
-		print("add_device_json", file=sys.stderr)
 		device_path = "%s/%s" % (self.configpath, device_name)
 		self.makedirs(device_path)
 
