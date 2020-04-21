@@ -21,7 +21,7 @@ import fnmatch
 
 class RemoveGadget(object):
 
-	def __init__(self, configpath, manage, verbose):
+	def __init__(self, configpath, manage, verbose = False):
 		self.configpath = configpath
 		self.m = manage
 		self.verbose = verbose

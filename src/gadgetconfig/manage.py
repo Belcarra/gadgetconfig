@@ -67,25 +67,21 @@ class ManageGadget(object):
 
 		return '<UNKNOWN>'
 
-	def vprint(self, verbose, s):
-		if verbose:
-			print(s, file=sys.stderr)
-
 	# checkfs will verify that the usb_gadget configfs is available
 	#
 	def checkfs(self, verbose=False):
 		try:
 			if not os.path.isdir(self.configpath):
-				self.vprint(verbose, "%s: not a directory" % (self.configpath))
+				self.vprint("%s: not a directory" % (self.configpath))
 				return False
 			if os.path.islink(self.configpath):
-				self.vprint(verbose, "%s: is a symlink to %s" % (self.configpath, os.path.realpath(self.configpath)))
+				self.vprint("%s: is a symlink to %s" % (self.configpath, os.path.realpath(self.configpath)))
 				return False
 			return True
 		except PermissionError:
-			self.vprint(verbose, "Cannot read: %s PermissionError" % (self.configpath))
+			self.vprint("Cannot read: %s PermissionError" % (self.configpath))
 		except NameError:
-			self.vprint(verbose, "Cannot read: %s NameError" % (self.configpath))
+			self.vprint("Cannot read: %s NameError" % (self.configpath))
 		return False
 
 	# def detach(self):
@@ -98,16 +94,16 @@ class ManageGadget(object):
 			if os.path.islink(fpath):
 				self.udclist.append(l)
 				self.realudcpath = os.path.realpath(fpath)
-				self.vprint(verbose, "  %s -> %s" % (l, self.realudcpath))
+				self.vprint("  %s -> %s" % (l, self.realudcpath))
 			else:
-				self.vprint(verbose, "  %s <UNKNOWN>" % (l))
-		self.vprint(verbose, "")
+				self.vprint("  %s <UNKNOWN>" % (l))
+		self.vprint("")
 		return self.udclist
 
 	def _query_gadget(self, all=False):
 		gadgets = []
 		dirs = os.listdir(self.configpath)
-		self.vprint(False, "Current Gadget configurations")
+		self.vprint("Current Gadget configurations")
 		if len(dirs) == 0:
 			return gadgets
 		for d in dirs:
@@ -139,7 +135,7 @@ class ManageGadget(object):
 	def query_gadgets(self):
 		gadgets = []
 		dirs = os.listdir(self.configpath)
-		self.vprint(False, "Current Gadget configurations")
+		self.vprint("Current Gadget configurations")
 		if len(dirs) == 0:
 			return gadgets
 		for d in dirs:
@@ -176,9 +172,9 @@ class ManageGadget(object):
 
 	def check_current(self, verbose=False):
 		dirs = os.listdir(self.configpath)
-		self.vprint(verbose, "Current Gadget configurations")
+		self.vprint("Current Gadget configurations")
 		if len(dirs) == 0:
-			self.vprint(verbose, "<NONE>")
+			self.vprint("<NONE>")
 
 		# print("check_current: %s" % (self.configpath))
 		# print("check_current: dirs: %s" % (dirs))
@@ -187,11 +183,11 @@ class ManageGadget(object):
 			# print("udc: type: %s len: %s" % (type(udc),len(udc)))
 			if len(udc) == 1 and len(udc[0]) > 1:
 				# print("udc: type: %s len: %s" % (type(udc[0]),len(udc[0])))
-				self.vprint(verbose, "  %s UDC -> %s" % (d, udc[0].rstrip()))
+				self.vprint("  %s UDC -> %s" % (d, udc[0].rstrip()))
 				self.configured_device = d
 			else:
-				self.vprint(verbose, "  %s Not Configured" % (d))
-		self.vprint(verbose, "")
+				self.vprint("  %s Not Configured" % (d))
+		self.vprint("")
 
 	# update UDC file to enable or disable a Gadget
 	def update_udc(self, name, s):
@@ -305,7 +301,7 @@ class ManageGadget(object):
 		try:
 			f = io.open(pathname)
 		except (FileNotFoundError):
-			self.vprint("add_device_file: File Not Found Error", file=sys.stderr)
+			self.vprint("add_device_file: File Not Found Error")
 			exit(1)
 		try:
 			device_definitions = commentjson.load(f)
