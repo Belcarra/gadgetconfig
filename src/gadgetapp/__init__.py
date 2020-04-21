@@ -251,6 +251,7 @@ class Editor:
 
 		self.exitFlag = False
 		self.tabs = None
+		self.initialdir="/etc/gadgetservice",
 
 		self.button1flag = False
 		#self.m = ManageGadget(sys_config_path)
@@ -282,7 +283,8 @@ class Editor:
 		# print("Editor:update", file=sys.stderr)
 		# sleep(1)
 		self.tabs.nb_update()
-		self.gadget_definitions_spinbox()
+		#self.gadget_definitions_spinbox()
+		self.gadget_spinbox_postcommand()
 		self.udc_button_set()
 		self.gadget_enable_button_set()
 		self.gadget_add_button_set()
@@ -370,10 +372,10 @@ class Editor:
 				return new_device_name
 
 	def gadget_add_button_pressed(self):
-		# print("gadget_add_button_pressed:", file=sys.stderr)
+		print("gadget_add_button_pressed:", file=sys.stderr)
 
 		f = filedialog.askopenfilename(
-			initialdir="/etc/gadgetservice",
+			initialdir=self.initialdir,
 			title="Select Gadget Definition File",
 			filetypes=(("json files", "*.json"), ("all files", "*.*")))
 
@@ -381,10 +383,10 @@ class Editor:
 			return
 		if f == '':
 			return
-		# print("--", file=sys.stderr)
-		# print(type(f), file=sys.stderr)
-		# print(f, file=sys.stderr)
-		# print("--", file=sys.stderr)
+		print("--", file=sys.stderr)
+		print(type(f), file=sys.stderr)
+		print(f, file=sys.stderr)
+		print("--", file=sys.stderr)
 		# if f is not None:
 		# 	print("gadget_add_button_pressed: file \"%s\"" % (f), file=sys.stderr)
 		# else:
@@ -393,6 +395,10 @@ class Editor:
 		if f is None:
 			return
 
+		old = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+
+		self.initialdir = os.path.dirname(f)
+		
 		new_device_name = self.m.check_device_file(f)
 		if new_device_name is not None:
 			new_device_name = self.get_new_device_name(f)
@@ -404,15 +410,23 @@ class Editor:
 			self.m.add_device_file(f, new_device_name=new_device_name)
 		except FileExistsError:
 			messagebox.showerror(title="Error", message="Gadget Definition for %s already exists!" % (self.m.check_device_file(f)))
-		self.gadget_definitions_spinbox()
+		#self.gadget_definitions_spinbox()
+		new = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+
+		print("gadget_add_button_pressed: old: %s" % (old))
+		print("gadget_add_button_pressed: new: %s" % (new))
+		added = [item for item in new if item not in old]
+		#added = list(set(new) - set(list))
+		print("gadget_add_button_pressed: added: %s" % (added))
+		self.gadget_spinbox_update(added[0])
 		self.notebook()
 		self.update()
 
 	def gadget_remove_button_set(self):
-		# print("gadget_remove_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
+		print("gadget_remove_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
 		current = self.gadget_spinbox.get().strip()
 		if current == self.m.query_gadget():
-			# print("gadget_remove_button_set: cannot remove enabled gadget", file=sys.stderr)
+			print("gadget_remove_button_set: cannot remove enabled gadget", file=sys.stderr)
 			self.gadget_remove_button['text'] = "Cannot Remove \"%s\" (disable first)" % (current)
 			self.gadget_remove_button['bg'] = 'Light Pink'
 		elif current == self.nodefstr:
@@ -423,54 +437,56 @@ class Editor:
 			self.gadget_remove_button['bg'] = 'Light Blue'
 
 	def gadget_remove_button_pressed(self):
-		# print("gadget_remove_button_pressed:", file=sys.stderr)
+		print("gadget_remove_button_pressed:", file=sys.stderr)
 		if self.gadget_spinbox.get().strip() == self.m.query_gadget():
 			messagebox.showerror(title="Error", message="Disable %s first" % (self.m.query_gadget()))
 			return
 		r = RemoveGadget(self.m.configpath, self.m)
 		r.remove_device(self.gadget_spinbox.get().strip())
-		self.gadget_definitions_spinbox()
+		self.gadget_spinbox_postcommand()
 		self.notebook()
 		self.update()
-		# print("gadget_remove_button_pressed: EXIT", file=sys.stderr)
 
 	# gadget_definitions_spinbox
 	# this needs to be created new for each change in the gadgets list
 	def gadget_definitions_spinbox(self):
-		current = None
-		if self.gadget_spinbox is not None:
-			current = self.gadget_spinbox.get().strip()
-			# print("#####\ngadget_definitions_spinbox: current: %s" % (current), file=sys.stderr)
-		else:
-			# print("#####\ngadget_definitions_spinbox: NO CURRENT", file=sys.stderr)
-			pass
 
-		v = sorted(self.m.query_gadgets(), key=str.casefold, reverse=True)
-		lv = v
-		# print("gadget_definitions_spinbox: v: %s" % (v), file=sys.stderr)
-		if len(v) == 0:
-			v.append(self.nodefstr)
-		v = [" " + x for x in v]
 		self.gadget_spinbox_title = tk.Label(self.tk, text='<-- Select Gadget Device Definition',
 				font=tkFont.Font(family='Helvetica', size=8), anchor='ne', justify='left')
-		self.gadget_spinbox = ttk.Combobox(self.tk, values=v, height=4, font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
+		
+		self.gadget_spinbox = ttk.Combobox(self.tk, state="readonly", 
+				values=[self.nodefstr], height=4, postcommand=self.gadget_spinbox_postcommand,
+				font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
 
 		self.gadget_spinbox_title.grid(row=1, rowspan=1, column=9, columnspan=1, sticky=tk.W, padx=(0, 1), pady=(4, 0))
 		self.gadget_spinbox.grid(row=1, rowspan=1, column=2, columnspan=7, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
 
 		self.gadget_spinbox.bind("<<ComboboxSelected>>", self.gadget_spinbox_command)
-		self.gadget_spinbox.current(0)
-		# print("gadget_definitions_spinbox: current: %s v: %s CHECK" % (current, v), file=sys.stderr)
-		if current in lv:
-			# print("gadget_definitions_spinbox: current: %s UPDATE" % (current), file=sys.stderr)
-			self.gadget_spinbox.set(current)
+		self.gadget_spinbox_postcommand()
+
 
 	def gadget_spinbox_command(self, arg):
 		# print("gadget_spinbox_command: arg: %s " % (arg), file=sys.stderr)
 		self.update()
 
+	def gadget_spinbox_postcommand(self):
+		self.gadget_spinbox_update(None)
+
+	def gadget_spinbox_update(self, selected):
+		self.gadget_spinbox.selection_clear()
+		current = self.gadget_spinbox.current()
+		if selected is None:
+			selected = self.gadget_spinbox.get()
+		v = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+		if len(v) == 0:
+			v.append(self.nodefstr)
+		self.gadget_spinbox['values'] = v
+		self.gadget_spinbox.current(0)
+		if selected in v:
+			self.gadget_spinbox.current(v.index(selected))
+
 	def doFoo(self, event):
-		print("doFoo: %s " % (event), file=sys.stderr)
+		# print("doFoo: %s " % (event), file=sys.stderr)
 		self.update()
 
 	def setExitFlag(self):
