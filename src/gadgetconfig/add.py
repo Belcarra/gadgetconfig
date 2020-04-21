@@ -46,8 +46,12 @@ class AddGadget(object):
 			f = open(path, "a")
 			f.writelines(s)
 			f.close()
+		except (FileNotFoundError):
+			self.vprint("%s %s FILE NOT FOUND ERROR" % (path, s.strip()))
+			exit(1)
 		except (PermissionError):
 			self.vprint("%s %s PERMISSION DENIED" % (path, s.strip()))
+			exit(1)
 
 	def write_bytes(self, path, bytes):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
@@ -62,8 +66,12 @@ class AddGadget(object):
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
+		except (FileNotFoundError):
+			self.vprint("%s %s FILE NOT FOUND ERROR" % (path, s.strip()))
+			exit(1)
 		except (PermissionError):
-			self.vprint("%s PERMISSION DENIED" % (path))
+			self.vprint("%s %s PERMISSION DENIED" % (path, s.strip()))
+			exit(1)
 
 	def write_8bytes(self, path, s):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
@@ -77,8 +85,12 @@ class AddGadget(object):
 			f = open(path, "ab")
 			f.write(binarray)
 			f.close()
+		except (FileNotFoundError):
+			self.vprint("%s %s FILE NOT FOUND ERROR" % (path, s.strip()))
+			exit(1)
 		except (PermissionError):
-			self.vprint("%s PERMISSION DENIED" % (path))
+			self.vprint("%s %s PERMISSION DENIED" % (path, s.strip()))
+			exit(1)
 
 	def makedirs(self, lpath, existsok=False):
 		self.vprint("makedirs: %s" % (lpath))
