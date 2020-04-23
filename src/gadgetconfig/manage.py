@@ -265,7 +265,7 @@ class ManageGadget(object):
 
 	# check_device_file
 	def check_device_file(self, pathname, device_name=None, args=None):
-		print("check_device_file: pathname: %s device_name %s" % (pathname, device_name))
+		# print("check_device_file: pathname: %s device_name %s" % (pathname, device_name))
 		try:
 			f = io.open(pathname)
 		except (FileNotFoundError):
