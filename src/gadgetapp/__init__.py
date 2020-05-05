@@ -70,29 +70,25 @@ def sysfs(paths, maxlevel=-1, pinclude=[], pexclude=[], include=[], exclude=[], 
 			pass
 	return s
 
-
+# systemctl
+# run systemctl to gather status info
+#
 def systemctl(service_name):
-	#status = os.system('systemctl status '+service_name)
-	#return status
 	result = subprocess.run(['systemctl', 'status', 'getty@ttyGS0', 'getty@ttyGS1', 'gadget', '--lines', '0'], stdout=subprocess.PIPE)
 	return result.stdout
 
 
-#def handler(signum, frame):
-#	print("handler: signum: %s frame: %s" % (signum, frame), file=sys.stderr)
-
-
+# watch
+# start a process to watch for changes in /sys, set a flag if anything changes
+#
 class watch:
 
 	def __init__(self, realudcpath):
 
-		# print('watch')
-		#self.i = inotify.adapters.Inotify()
 		self.i = inotify.adapters.Inotify(block_duration_s=1)
 		self.realudcpath = realudcpath
 		self.udcstatepath = "%s/state" % realudcpath
 
-		#i.add_watch('/tmp')
 		self.i.add_watch(self.udcstatepath)
 		self.i.add_watch('/sys/kernel/config/usb_gadget')
 
@@ -100,8 +96,6 @@ class watch:
 		self.events = 0
 		self.stopFlag = False
 
-		#with open('/tmp/test_file', 'w'):
-		#    pass
 		self.x = threading.Thread(target=self.run)
 
 	def run(self):
@@ -112,7 +106,7 @@ class watch:
 				if self.stopFlag:
 					# print('watch exiting', file=sys.stderr)
 					return
-				#print('.', file=sys.stderr)
+				# print('.', file=sys.stderr)
 				if event is not None:
 					(_, type_names, path, filename) = event
 					if path == self.udcstatepath and 'IN_MODIFY' in type_names:
@@ -138,10 +132,11 @@ class watch:
 	def stop(self):
 		self.stopFlag = True
 
-
+# tabs
+# Implement a notebook with tabs to display information of interest in each tab
+#
 class Tabs:
 	def __init__(self, m, tk, row=0, column=0, columnspan=0):
-		#self.tabs = 0
 		self.m = m
 		self.tk = tk
 		self._nextID = 0
@@ -174,7 +169,6 @@ class Tabs:
 	def add_tab(self, name):
 
 		id = self._nextID
-		# print("add_tab: id: %s name: %s" % (id, name), file=sys.stderr)
 
 		self.tabIDs[id] = name
 		self.nameIDs[name] = id
@@ -209,12 +203,7 @@ class Tabs:
 			self.add_tab(g)
 
 	def nb_test(self, event=None):
-		#showinfo("Success", "It works!")
-		#current_tab_id = self.select()
-
 		self.currentID = event.widget.index('current')
-		# print("nb_test: event: %s currentID: %s %s" % (event, self.currentID, self.tabIDs[self.currentID]), file=sys.stderr)
-		#self.nb_update(self.tabID)
 		self.nb_update()
 
 	def nb_update(self):
@@ -241,11 +230,10 @@ class Tabs:
 		return "break"
 
 	def tab_test(self, event=None):
-		# print("tab_test: event: %s" % (event), file=sys.stderr)
-		#Imagine the code for selecting the text widget is here.
 		return "break"
 
-
+# Editor
+#
 class Editor:
 	def __init__(self, manage=None):
 
@@ -259,7 +247,6 @@ class Editor:
 		self.gadget_spinbox = None
 		# p = self.m.get_realudcpath()
 		# print("p: %s" % (p), file=sys.stderr)
-		# self.udc_watch = Watch(self.m.get_realudcpath(), self.udc_changed)
 		# self.gadget_watch = Watch("/sys/kernel/config/usb_gadget", self.gadget_changed)
 		self.nodefstr = '-- no Gadget Definitions --'
 
@@ -268,16 +255,6 @@ class Editor:
 
 	def event(self):
 		self.tk.event_generate("<<FOO>>", when="now")
-
-	def udc_changed(self, signum, frame):
-		# print("*****\nudc_changed: signum: %s frame: %s" % (signum, frame), file=sys.stderr)
-		self.tk.event_generate("<<FOO>>", when="now")
-		self.udc_watch.close()
-
-	def gadget_changed(self, signum, frame):
-		# print("*****\nudc_changed: signum: %s frame: %s" % (signum, frame), file=sys.stderr)
-		self.tk.event_generate("<<FOO>>", when="now")
-		self.gadget_watch.close()
 
 	def update(self):
 		# print("Editor:update", file=sys.stderr)
@@ -372,27 +349,18 @@ class Editor:
 				return new_device_name
 
 	def gadget_add_button_pressed(self):
-		print("gadget_add_button_pressed:", file=sys.stderr)
+		#print("gadget_add_button_pressed:", file=sys.stderr)
 
 		f = filedialog.askopenfilename(
 			initialdir=self.initialdir,
 			title="Select Gadget Definition File",
 			filetypes=(("json files", "*.json"), ("all files", "*.*")))
 
+		if f is None:
+			return
 		if isinstance(f, tuple):
 			return
 		if f == '':
-			return
-		print("--", file=sys.stderr)
-		print(type(f), file=sys.stderr)
-		print(f, file=sys.stderr)
-		print("--", file=sys.stderr)
-		# if f is not None:
-		# 	print("gadget_add_button_pressed: file \"%s\"" % (f), file=sys.stderr)
-		# else:
-		# 	print("gadget_add_button_pressed: file NONE", file=sys.stderr)
-
-		if f is None:
 			return
 
 		old = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
@@ -404,7 +372,7 @@ class Editor:
 			new_device_name = self.get_new_device_name(f)
 			if new_device_name is None:
 				return
-		# print("####\ngadget_add_button_pressed: file: %s %s" % (f, new_device_name), file=sys.stderr)
+		#print("####\ngadget_add_button_pressed: file: %s %s" % (f, new_device_name), file=sys.stderr)
 		try:
 			# print("calling add_device_file", file=sys.stderr)
 			self.m.add_device_file(f, new_device_name=new_device_name)
@@ -413,20 +381,14 @@ class Editor:
 		#self.gadget_definitions_spinbox()
 		new = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
 
-		print("gadget_add_button_pressed: old: %s" % (old))
-		print("gadget_add_button_pressed: new: %s" % (new))
 		added = [item for item in new if item not in old]
-		#added = list(set(new) - set(list))
-		print("gadget_add_button_pressed: added: %s" % (added))
 		self.gadget_spinbox_update(added[0])
 		self.notebook()
 		self.update()
 
 	def gadget_remove_button_set(self):
-		print("gadget_remove_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
 		current = self.gadget_spinbox.get().strip()
 		if current == self.m.query_gadget():
-			print("gadget_remove_button_set: cannot remove enabled gadget", file=sys.stderr)
 			self.gadget_remove_button['text'] = "Cannot Remove \"%s\" (disable first)" % (current)
 			self.gadget_remove_button['bg'] = 'Light Pink'
 		elif current == self.nodefstr:
@@ -437,7 +399,6 @@ class Editor:
 			self.gadget_remove_button['bg'] = 'Light Blue'
 
 	def gadget_remove_button_pressed(self):
-		print("gadget_remove_button_pressed:", file=sys.stderr)
 		if self.gadget_spinbox.get().strip() == self.m.query_gadget():
 			messagebox.showerror(title="Error", message="Disable %s first" % (self.m.query_gadget()))
 			return
@@ -545,6 +506,7 @@ def main():
 
 	sys_config_path = "/sys/kernel/config/usb_gadget"
 	m = ManageGadget(sys_config_path)
+
 	# print('realudcpath: %s' % (m.query_udc_path()))
 	w = watch(m.query_udc_path())
 	w._start()
@@ -552,13 +514,28 @@ def main():
 	e = Editor(manage=m)
 	e.tk()
 
+	# replacement for tk.mainloop() 
+	# This is slightly painful, tk.update() needs to be in main process,
+	# but we want to have a separate thread watching for changes in the /sys
+	# filesystem. The various approaches for that either also want to live
+	# in the main process, or stall. By implementing our own mainloop
+	# equivalent we can check the event flag set when something changes
+	# in the watched filesystem.
+	# 
 	while not e.exitFlag:
+
+		# do the tkinter update
 		e.tk.update()
 
+		# wait for a short period
 		try:
 			sleep(.1)
+
+		# exit cleanly on break
 		except(KeyboardInterrupt):
 			break
+
+		# if flag then call the event handler to update 
 		if w.event():
 			e.event()
 

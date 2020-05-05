@@ -3,9 +3,9 @@
 {
     "g_multi": {
         # USB Device Descriptor Fields
-        "idVendor": "0x1d6b",
-        "idProduct": "0x0104",
-        "bcdDevice": "0x0404",
+        "idVendor": "0x15ec",
+        "idProduct": "0xf102",
+        "bcdDevice": "0x0001",
         "bDeviceClass": "0x00",
         "bDeviceSubClass": "0x00",
         "bDeviceProtocol": "0x00",
@@ -15,8 +15,8 @@
         "strings": {
             "0x409": {
                 "serialnumber": "2018BBBK033A",
-                "product": "BeagleBoneBlack",
-                "manufacturer": "BeagleBoard.org"
+                "product": "RaspberryPi4",
+                "manufacturer": "Belarra"
             }
         },
         # Gadget Functions list: see /sys/module/usb_f*,
@@ -24,23 +24,6 @@
         #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
         # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
         "functions": {
-            "acm.usb0": {},
-            "ecm.usb0": {
-                "qmult": "5",
-                "host_addr": "74:e1:82:5e:39:c0",
-                "dev_addr": "74:e1:82:5e:39:c1"
-            },
-            "mass_storage.usb0": {
-                "stall": "0",
-                "lun.0": {
-                    "inquiry_string": "",
-                    "nofua": "1",
-                    "cdrom": "0",
-                    "removable": "1",
-                    "ro": "1",
-                    "file": "/var/cache/doc-beaglebone-getting-started/beaglebone-getting-started-2019-10-31.img"
-                }
-            },
             "rndis.usb0": {
                 "protocol": "01",
                 "subclass": "04",
@@ -69,7 +52,7 @@
                 "strings": {
                     # USB Device Configuration Strings
                     "0x409": {
-                        "configuration": "BeagleBone Composite"
+                        "configuration": "RNDIS/ACM Composite"
                     }
                 },
                 # This determines the order in the Configuration descriptor
@@ -78,21 +61,6 @@
                         # Host Match USB\VID_1D6B&PID_0104&MI_00
                         "name": "rndis.usb0",
                         "function": "rndis.usb0"
-                    },
-                    {
-                        # Host Match USB\VID_1D6B&PID_0104&MI_01
-                        "name": "mass_storage.usb0",
-                        "function": "mass_storage.usb0"
-                    },
-                    {
-                        # Host Match USB\VID_1D6B&PID_0104&MI_02
-                        "name": "ecm.usb0",
-                        "function": "ecm.usb0"
-                    },
-                    {
-                        # Host Match USB\VID_1D6B&PID_0104&MI_04
-                        "name": "acm.usb0",
-                        "function": "acm.usb0"
                     }
                 ]
             }

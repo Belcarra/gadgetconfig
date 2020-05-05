@@ -3,9 +3,9 @@
 {
     "g_multi": {
         # USB Device Descriptor Fields
-        "idVendor": "0x1d6b",
-        "idProduct": "0x0104",
-        "bcdDevice": "0x0404",
+        "idVendor": "0x15ec",
+        "idProduct": "0xe030",
+        "bcdDevice": "0x0001",
         "bDeviceClass": "0x00",
         "bDeviceSubClass": "0x00",
         "bDeviceProtocol": "0x00",
@@ -15,7 +15,7 @@
         "strings": {
             "0x409": {
                 "serialnumber": "000000000000",
-                "product": "Demo",
+                "product": "RNDIS/ACM Composite",
                 "manufacturer": "www.belcarra.com"
             }
         },
