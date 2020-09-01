@@ -1,0 +1,61 @@
+# Gadget Device Definition File
+# 2020-05-05
+{
+    "ECM-Subset": {
+        # USB Device Descriptor Fields
+        "idVendor": "0x15ec",
+        "idProduct": "0xf101",
+        "bcdDevice": "0x0001",
+        "bDeviceClass": "0x00",
+        "bDeviceSubClass": "0x00",
+        "bDeviceProtocol": "0x00",
+        "bcdUSB": "0x0200",
+        "bMaxPacketSize0": "0x40",
+        # USB Device Strings
+        "strings": {
+            "0x409": {
+                "serialnumber": "0123456789",
+                "product": "CDC ECM-Subset 15ec/f101",
+                "manufacturer": "Belcarra ECM-Subset Test"
+            }
+        },
+        # Gadget Functions list: see /sys/module/usb_f*,
+        # E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage
+        #       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial
+        # Use: The function name (without prefix) is used with instantion name, e.g. eem.usb0 or acm.GS0
+        "functions": {
+            "geth.usb0": {
+                "qmult": "5",
+                "host_addr": "b6:fe:ea:86:2a:50",
+                "dev_addr": "4e:28:20:f0:35:ab"
+            }
+        },
+        # Gadget Configurations list
+        "configs": {
+            "Belcarra ECM-Subset.1": {
+                # Configuration Descriptor
+                # bmAttributes: bit 5 support remote wakeup
+                # bmAttributes: bit 6 self-powered
+                # bmAttributes: bit 7 bus-powered
+                # MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set
+                "bmAttributes": "0x80",
+                "MaxPower": "2",
+                "strings": {
+                    # USB Device Configuration Strings
+                    "0x409": {
+                        "configuration": "CDC ECM-Subset"
+                    }
+                },
+                # This determines the order in the Configuration descriptor
+                "functions": [
+                    {
+                        # Host Match USB\VID_15EC&PID_F102
+                        "name": "geth.usb0",
+                        "function": "geth.usb0"
+                    }
+                ]
+            }
+        }
+    }
+}
+# vim: syntax=off
