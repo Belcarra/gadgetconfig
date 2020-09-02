@@ -237,7 +237,7 @@ class Tabs:
 # Editor
 #
 class Editor:
-	def __init__(self, manage=None, location=None):
+	def __init__(self, manage=None, location=None, auto_serialnumber=False):
 
 		self.exitFlag = False
 		self.tabs = None
@@ -252,6 +252,7 @@ class Editor:
 		# self.gadget_watch = Watch("/sys/kernel/config/usb_gadget", self.gadget_changed)
 		self.nodefstr = '-- no Gadget Definitions --'
 		self.location = location
+		self.auto_serialnumber = auto_serialnumber
 
 	def onevent(self, event):
 		print("onevent: %s" % (event))
@@ -266,6 +267,7 @@ class Editor:
 		#self.gadget_definitions_spinbox()
 		self.gadget_spinbox_postcommand()
 		self.udc_button_set()
+		self.gadget_auto_serialnumber_set()
 		self.gadget_enable_button_set()
 		self.gadget_add_button_set()
 		self.gadget_remove_button_set()
@@ -296,6 +298,16 @@ class Editor:
 
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
+	def gadget_auto_serialnumber_set(self):
+		if self.auto_serialnumber:
+			self.gadget_auto_serialnumber['bg'] = 'Light Green'
+			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Enabled'
+		else:
+			self.gadget_auto_serialnumber['bg'] = 'Light Grey'
+			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Disabled'
+
+	# gadget button - enable and disable
+	# display currently Enabled Gadget as label
 	def gadget_enable_button_set(self):
 		# print("gadget_enable_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
 		gadget = self.m.query_gadget()
@@ -318,6 +330,11 @@ class Editor:
 				t = "Disable \"%s\"" % (gadget)
 				self.gadget_enable_button['bg'] = 'Light Green'
 		self.gadget_enable_button['text'] = t
+
+	def gadget_auto_serialnumber_pressed(self):
+		print("*****\ngadget_enable_button_pressed: ", file=sys.stderr)
+		self.auto_serialnumber = not self.auto_serialnumber
+		self.update()
 
 	def gadget_enable_button_pressed(self):
 		# print("*****\ngadget_enable_button_pressed: ", file=sys.stderr)
@@ -378,7 +395,7 @@ class Editor:
 		#print("####\ngadget_add_button_pressed: file: %s %s" % (f, new_device_name), file=sys.stderr)
 		try:
 			# print("calling add_device_file", file=sys.stderr)
-			self.m.add_device_file(f, new_device_name=new_device_name)
+			self.m.add_device_file(f, new_device_name=new_device_name, auto_serialnumber=self.auto_serialnumber)
 		except FileExistsError:
 			messagebox.showerror(title="Error", message="Gadget Definition for %s already exists!" % (self.m.check_device_file(f)))
 		#self.gadget_definitions_spinbox()
@@ -462,13 +479,18 @@ class Editor:
 		self.tk.bind("<<FOO>>", self.doFoo)
 		self.tk.bind("<Button-1>", self.doFoo)
 		self.tk.bind("<Button-3>", self.doFoo)
-		self.tk.geometry("700x660" + self.location)
+		if self.location:
+			self.tk.geometry("700x660" + self.location)
+		else:
+			self.tk.geometry("700x660")
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
 
 		# the spinbox is created and recreated on the fly to respond to the current list of gadgets
 		self.gadget_definitions_spinbox()
+
+		self.gadget_auto_serialnumber = tk.Button(self.tk, text='auto_serialnumber', command=self.gadget_auto_serialnumber_pressed, width=28, anchor='w')
 
 		self.gadget_enable_button = tk.Button(self.tk, text='', command=self.gadget_enable_button_pressed, width=28, anchor='w')
 		self.gadget_remove_button = tk.Button(self.tk, text='', command=self.gadget_remove_button_pressed, width=28, anchor='w')
@@ -479,6 +501,7 @@ class Editor:
 		self.udc_button.grid(row=1, rowspan=2, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_add_button.grid(row=3, rowspan=1, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 
+		self.gadget_auto_serialnumber.grid(row=1, rowspan=1, column=9, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_enable_button.grid(row=2, rowspan=1, column=2, columnspan=8, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_remove_button.grid(row=3, rowspan=1, column=2, columnspan=8, sticky=tk.NSEW, pady=(1, 1))
 

@@ -298,7 +298,7 @@ class ManageGadget(object):
 					data[k] = repl
 				self.replace(v, match, repl)
 
-	def add_device_file(self, pathname, new_device_name=None, args=None, sh=False, enable=False):
+	def add_device_file(self, pathname, new_device_name=None, args=None, sh=False, enable=False, auto_serialnumber=None):
 		# print("*****\nadd_device_file: path: %s new_device_name: %s" % (pathname, new_device_name), file=sys.stdeff)
 		a = AddGadget(self.configpath, pathname=pathname, verbose=self.verbose, sh=sh, enable=enable)
 		try:
@@ -332,7 +332,7 @@ class ManageGadget(object):
 				if args.dev_addr: self.replace(device_definition, 'dev_addr', args.dev_addr)
 				if args.host_addr: self.replace(device_definition, 'host_addr', args.host_addr)
 
-			if self.auto_serialnumber:
+			if self.auto_serialnumber or auto_serialnumber:
 				serialnumber_path = "/proc/device-tree/serial-number"
 				try:
 					f = open(serialnumber_path)
