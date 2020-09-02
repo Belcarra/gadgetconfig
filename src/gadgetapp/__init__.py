@@ -20,6 +20,8 @@
 
 import os
 import sys
+import argparse
+
 # import fcntl
 # import signal
 
@@ -235,7 +237,7 @@ class Tabs:
 # Editor
 #
 class Editor:
-	def __init__(self, manage=None):
+	def __init__(self, manage=None, location=None):
 
 		self.exitFlag = False
 		self.tabs = None
@@ -249,6 +251,7 @@ class Editor:
 		# print("p: %s" % (p), file=sys.stderr)
 		# self.gadget_watch = Watch("/sys/kernel/config/usb_gadget", self.gadget_changed)
 		self.nodefstr = '-- no Gadget Definitions --'
+		self.location = location
 
 	def onevent(self, event):
 		print("onevent: %s" % (event))
@@ -459,7 +462,7 @@ class Editor:
 		self.tk.bind("<<FOO>>", self.doFoo)
 		self.tk.bind("<Button-1>", self.doFoo)
 		self.tk.bind("<Button-3>", self.doFoo)
-		self.tk.geometry("700x660")
+		self.tk.geometry("700x660" + self.location)
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
@@ -504,14 +507,26 @@ class Editor:
 
 def main():
 
-	sys_config_path = "/sys/kernel/config/usb_gadget"
-	m = ManageGadget(sys_config_path)
+	parser = argparse.ArgumentParser(
+		usage='%(prog)s [command][options]',
+		description="GUI Configure Gadget Device using SysFS and ConfigFS",
+		formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=999))
 
-	# print('realudcpath: %s' % (m.query_udc_path()))
+	parser.add_argument("--location", type=str, help="Optional window location +x+y")
+	parser.add_argument("--auto_serialnumber", type=str, help="Set auto_serialnumber mode")
+
+	args = parser.parse_args()
+
+	print('location: %s' % (args.location))
+
+	sys_config_path = "/sys/kernel/config/usb_gadget"
+	m = ManageGadget(sys_config_path, auto_serialnumber=args.auto_serialnumber)
+
+	print('realudcpath: %s' % (m.query_udc_path()))
 	w = watch(m.query_udc_path())
 	w._start()
 
-	e = Editor(manage=m)
+	e = Editor(manage=m, location=args.location)
 	e.tk()
 
 	# replacement for tk.mainloop() 

@@ -23,6 +23,8 @@ class AddGadget(object):
 		self.enable = enable
 		self.pathname = pathname
 		self.verbose = verbose
+
+
 		#print("AddGadget: sh: %s" % (sh), file=sys.stderr)
 		#print("AddGadget: verbose: %s" % (verbose), file=sys.stderr)
 		# self.verbose = True

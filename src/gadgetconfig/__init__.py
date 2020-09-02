@@ -84,6 +84,7 @@ def main():
 	parser.add_argument("--manufacturer", type=str, help="Optional device manufacturer string")
 	parser.add_argument("--product", type=str, help="Optional device product string")
 	parser.add_argument("--serialnumber", type=str, help="Optional device serialnumber string")
+	parser.add_argument("--auto_serialnumber", action='store_true', help="Enable auto_serialnumber mode")
 
 	parser.add_argument("--dev_addr", type=str, help="Optional ecm dev_addr attribute")
 	parser.add_argument("--host_addr", type=str, help="Optional ecm host_addr attribute")
@@ -103,7 +104,7 @@ def main():
 	else:
 		sys_config_path = "/sys/kernel/config/usb_gadget"
 
-	m = ManageGadget(sys_config_path, verbose=args.verbose)
+	m = ManageGadget(sys_config_path, verbose=args.verbose, auto_serialnumber=args.auto_serialnumber)
 	if args.query_gadget:
 		print("Currently configured: %s" % (m.query_gadget_verbose()), file=sys.stderr)
 		exit(0)

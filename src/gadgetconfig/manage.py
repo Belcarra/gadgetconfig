@@ -23,7 +23,7 @@ except ModuleNotFoundError:
 
 class ManageGadget(object):
 
-	def __init__(self, configpath, test=False, verbose=False):
+	def __init__(self, configpath, test=False, verbose=False, auto_serialnumber=False):
 		self.configpath = configpath
 		self.udcpath = "/sys/class/udc"
 		self.realudcpath = ''
@@ -31,11 +31,14 @@ class ManageGadget(object):
 		self.test = test
 		self.configured_device = ''
 		self.verbose = verbose
+		self.auto_serialnumber = auto_serialnumber
 		# print("ManageGadget: verbose: %s" % (verbose))
 
 		self.checkfs(verbose=verbose)
 		self.find_udcs(verbose=verbose)
 		self.check_current(verbose=verbose)
+
+
 
 	def vprint(self, s):
 		if self.verbose:
@@ -328,6 +331,17 @@ class ManageGadget(object):
 				if args.serialnumber: self.replace(device_definition, 'serialnumber', args.serialnumber)
 				if args.dev_addr: self.replace(device_definition, 'dev_addr', args.dev_addr)
 				if args.host_addr: self.replace(device_definition, 'host_addr', args.host_addr)
+
+			if self.auto_serialnumber:
+				serialnumber_path = "/proc/device-tree/serial-number"
+				try:
+					f = open(serialnumber_path)
+					lines = f.readlines(1)
+					serialnumber = lines[0]
+					serialnumber = serialnumber[:-1]
+					self.replace(device_definition, 'serialnumber', serialnumber)
+				except:
+					pass
 
 			a.add_device_json(device_definition, device_name=device_name)
 
