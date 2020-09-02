@@ -299,6 +299,7 @@ class Editor:
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
 	def gadget_auto_serialnumber_set(self):
+		print("*****\ngadget_auto_serialnumber_set: %s" % (self.auto_serialnumber), file=sys.stderr)
 		if self.auto_serialnumber:
 			self.gadget_auto_serialnumber['bg'] = 'Light Green'
 			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Enabled'
@@ -332,7 +333,7 @@ class Editor:
 		self.gadget_enable_button['text'] = t
 
 	def gadget_auto_serialnumber_pressed(self):
-		print("*****\ngadget_enable_button_pressed: ", file=sys.stderr)
+		print("*****\nauto_serialnumber_pressed: ", file=sys.stderr)
 		self.auto_serialnumber = not self.auto_serialnumber
 		self.update()
 
@@ -386,7 +387,7 @@ class Editor:
 		old = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
 
 		self.initialdir = os.path.dirname(f)
-		
+
 		new_device_name = self.m.check_device_file(f)
 		if new_device_name is not None:
 			new_device_name = self.get_new_device_name(f)
@@ -506,6 +507,7 @@ class Editor:
 		self.gadget_remove_button.grid(row=3, rowspan=1, column=2, columnspan=8, sticky=tk.NSEW, pady=(1, 1))
 
 		self.udc_button_set()
+		self.gadget_auto_serialnumber_set()
 		self.gadget_enable_button_set()
 		self.gadget_add_button_set()
 		self.gadget_remove_button_set()
@@ -536,20 +538,21 @@ def main():
 		formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=999))
 
 	parser.add_argument("--location", type=str, help="Optional window location +x+y")
-	parser.add_argument("--auto_serialnumber", type=str, help="Set auto_serialnumber mode")
+	parser.add_argument("--auto_serialnumber", action='store_true', help="Enable auto_serialnumber mode")
 
 	args = parser.parse_args()
 
 	print('location: %s' % (args.location))
 
 	sys_config_path = "/sys/kernel/config/usb_gadget"
-	m = ManageGadget(sys_config_path, auto_serialnumber=args.auto_serialnumber)
+	#m = ManageGadget(sys_config_path, auto_serialnumber=args.auto_serialnumber)
+	m = ManageGadget(sys_config_path)
 
 	print('realudcpath: %s' % (m.query_udc_path()))
 	w = watch(m.query_udc_path())
 	w._start()
 
-	e = Editor(manage=m, location=args.location)
+	e = Editor(manage=m, location=args.location, auto_serialnumber=args.auto_serialnumber)
 	e.tk()
 
 	# replacement for tk.mainloop() 
