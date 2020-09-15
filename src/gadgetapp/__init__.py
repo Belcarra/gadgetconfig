@@ -375,7 +375,18 @@ class Editor:
 		f = filedialog.askopenfilename(
 			initialdir=self.initialdir,
 			title="Select Gadget Definition File",
-			filetypes=(("json files", "*.json"), ("all files", "*.*")))
+			#filetypes=(("json files", "rndis*.json"), ("all files", "*.*")))
+			filetypes=(
+				("all files", "*.*"),
+				("eem*", "eem*.json"), 
+				("ecm*", "eem*.json"), 
+				("ncm*", "eem*.json"), 
+				("rndis*", "rndis*.json"),
+				("*eem*", "*eem*.json"), 
+				("*ecm*", "*eem*.json"), 
+				("*ncm*", "*eem*.json"), 
+				("*rndis*", "*rndis*.json")
+				))
 
 		if f is None:
 			return
