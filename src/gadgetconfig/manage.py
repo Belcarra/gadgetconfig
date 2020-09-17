@@ -9,6 +9,7 @@
 import io
 import os
 import sys
+import hashlib
 import commentjson
 
 try:
@@ -340,7 +341,19 @@ class ManageGadget(object):
 					serialnumber = lines[0]
 					serialnumber = serialnumber[:-1]
 					self.replace(device_definition, 'serialnumber', serialnumber)
+					#print(serialnumber)
+					m = hashlib.md5(bytes(serialnumber, 'ascii'))
+					digest = m.hexdigest()
+					digest = ':' . join(digest[i:i+2] for i in range(0, len(digest), 2))
+					host_addr = digest[0:1] + "2" +  digest[2:17]
+					dev_addr = digest[18:19] + "2" +  digest[20:35]
+					#print("host: %s" % (host_addr))
+					#print("dev:  %s" % (dev_addr))
+					self.replace(device_definition, 'dev_addr', dev_addr)
+					self.replace(device_definition, 'host_addr', host_addr)
+					
 				except:
+					print("caught")
 					pass
 
 			a.add_device_json(device_definition, device_name=device_name)

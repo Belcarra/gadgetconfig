@@ -299,7 +299,7 @@ class Editor:
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
 	def gadget_auto_serialnumber_set(self):
-		print("*****\ngadget_auto_serialnumber_set: %s" % (self.auto_serialnumber), file=sys.stderr)
+		#print("*****\ngadget_auto_serialnumber_set: %s" % (self.auto_serialnumber), file=sys.stderr)
 		if self.auto_serialnumber:
 			self.gadget_auto_serialnumber['bg'] = 'Light Green'
 			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Enabled'
