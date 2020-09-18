@@ -97,6 +97,7 @@ class watch:
 		self.eventFlag = False
 		self.events = 0
 		self.stopFlag = False
+		self.spinboxvalues = []
 
 		self.x = threading.Thread(target=self.run)
 
@@ -148,17 +149,17 @@ class Tabs:
 		self.texthash = {}
 		self.currentID = 0
 
-		self.customFont = tkFont.Font(family='monospace regular', size=9)
+		self.customFont = tkFont.Font(family='monospace regular', size=8)
 		self.frame = Frame(self.tk)
-		self.frame.grid(row=5, rowspan=2, column=1, columnspan=9, sticky="nsew")
+		self.frame.grid(row=5, rowspan=2, column=1, columnspan=10, sticky="nsew")
 
-		self.nb = Notebook(self.frame, width=680, height=520)
+		self.nb = Notebook(self.frame, width=540, height=520)
 		self.nb.bind("<ButtonRelease-1>", self.nb_test)
 		self.nb.bind("<<NotebookTabChanged>>", self.nb_test)
 		self.nb.pack(expand=1, fill='both')
 		self.nb.bind("<Button-3>", self.nbFoo)
 
-		self.tab_names = ["UDC State", "Gadget", "Systemd"]
+		self.tab_names = ["Gadget", "UDC State", "Systemd"]
 		for n in self.tab_names:
 			self.add_tab(n)
 
@@ -166,7 +167,7 @@ class Tabs:
 
 	def nbFoo(self, event):
 		print("nbFoo: %s " % (event), file=sys.stderr)
-		self.update()
+		self.update(selection=None, msg="nbFoo")
 
 	def add_tab(self, name):
 
@@ -210,13 +211,19 @@ class Tabs:
 
 	def nb_update(self):
 		s = ''
-		if self.currentID == 0:
+		if self.currentID == 1:
 			s = sysfs(['/sys/devices/platform/soc'], -1,
 				include=["*.usb", ["udc"], [], ["soft_connect", "function", "maximum_speed", "state", "uevent"]])
 
-		elif self.currentID == 1:
+		elif self.currentID == 0:
 			s = sysfs(['/sys/kernel/config/usb_gadget/'], 4, 
-					pinclude=['*/UDC', '*/idVendor', '*/idProduct', '*/strings/0x409/*'])
+					#pinclude=['*/UDC', '*/idVendor', '*/idProduct', '*/strings/0x409/*', '*/functions/*' ],
+					pinclude=['*/functions/*', '*/functions/*/*_addr', '*/id*', '*/UDC',
+						'*/strings/*/manufacturer', '*/strings/*/product', '*/strings/*/serial*' 
+						'*/configs/*/strings/*/configuration', 
+						]
+					)
+					#pinclude=['*/UDC', '*/idVendor', '*/idProduct', '*/strings/0x409/*'],)
 					#pinclude=['*/UDC', '*/idVendor', '*/idProduct', 'strings/0x409/*'])
 					#include=[[], ["UDC", "idVendor", "idProduct"], ['strings'], ['0x409'], ['manufacturer']])
 		elif self.currentID == 2:
@@ -250,7 +257,7 @@ class Editor:
 		# p = self.m.get_realudcpath()
 		# print("p: %s" % (p), file=sys.stderr)
 		# self.gadget_watch = Watch("/sys/kernel/config/usb_gadget", self.gadget_changed)
-		self.nodefstr = '-- no Gadget Definitions --'
+		self.no_def_str = '<empty>'
 		self.location = location
 		self.auto_serialnumber = auto_serialnumber
 
@@ -260,25 +267,170 @@ class Editor:
 	def event(self):
 		self.tk.event_generate("<<FOO>>", when="now")
 
-	def update(self):
+	# gadget_definitions_spinbox
+	# this needs to be created new for each change in the gadgets list
+	def gadget_definitions_spinbox(self, selection=None):
+
+		print("gadget_definitions_spinbox: ------------ selection: %s" % (selection))
+		if selection is None:
+			if self.gadget_spinbox is not None:
+				selection = self.gadget_spinbox.get().strip()
+				print("gadget_definitions_spinbox: ------------ selection: %s updated" % (selection))
+		
+		self.gadget_spinbox = ttk.Combobox(self.tk, state="readonly", 
+				values=[self.no_def_str], height=4, postcommand=self.gadget_spinbox_postcommand, width=10,
+				font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
+
+		self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=2, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
+
+		self.gadget_spinbox.bind("<<ComboboxSelected>>", self.gadget_spinbox_command)
+
+		v = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+		if len(v) == 0:
+			self.gadget_spinbox['values'] = self.no_def_str
+			self.gadget_spinbox.current(0)
+			print("gadgets_definitions_spinbox: setting values: %s" % (self.no_def_str))
+			print("------------")
+			return
+
+		self.gadget_spinbox['values'] = v
+		print("gadgets_definitions_spinbox: setting values: %s" % (v))
+
+		if selection is None:
+			selection = self.m.query_gadget()
+			print("gadgets_definitions_spinbox: selection from query %s" % (selection))
+		else:
+			print("gadgets_definitions_spinbox: selection %s" % (selection))
+
+		if selection in v:
+			print("gadget_definitions_spinbox: current: %d" % (v.index(selection)))
+			self.gadget_spinbox.current(v.index(selection))
+			print("------------")
+			return
+
+		print("gadget_definitions_spinbox: selection not found")
+		self.gadget_spinbox.current(0)
+		print("------------")
+
+		# get list of all gadgets, will include selected
+
+
+	def gadget_spinbox_command(self, arg):
+		selection = self.gadget_spinbox.get().strip()
+		current = self.gadget_spinbox.current()
+		print("gadget_spinbox_command: arg: %s current: %d selection: %s" % (arg, current, selection), file=sys.stderr)
+		self.update(selection=selection, msg="gadget_spinbox_command")
+		print("gadget_spinbox_command: current: %d -------------------------------------------" % (current))
+		return
+		v = self.gadget_spinbox['values']
+		#v = self.spinboxvalues
+		selection = v[current]
+
+
+	def gadget_spinbox_postcommand(self):
+		selection = self.gadget_spinbox.get().strip()
+		current = self.gadget_spinbox.current()
+		print("gadget_spinbox_postcommand: current: %d selection: %s" % (current, selection), file=sys.stderr)
+		#self.gadget_spinbox_update(None, "POST")
+
+	def gadget_spinbox_update(self, selected, msg):
+		return
+		self.gadget_spinbox.selection_clear()
+		current = self.gadget_spinbox.current()
+		print("gadget_spinbox_update: selected: %s current: %d ------------------------------------------- %s" % (selected, current, msg))
+		return
+
+		if selected is None:
+			selected = self.gadget_spinbox.get()
+			print("gadget_spinbox_update: selected: %s GET" % (selected))
+		else:
+			v = self.gadget_spinbox['values']
+			#v = self.spinboxvalues
+			current = v[current]
+
+
+		# get list of all gadgets, will include selected
+		#v = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+		#if len(v) == 0:
+		#	v.append(self.no_def_str)
+
+		#self.gadget_spinbox['values'] = v
+		#self.spinboxvalues = v
+		#print("gadget_spinbox_update: v: %s" % (v))
+		#self.gadget_spinbox.current(0)
+
+		if selected in v:
+			print("gadget_spinbox_update: current: %d" % (v.index(selected)))
+			self.gadget_spinbox.current(v.index(selected))
+		else:
+			self.gadget_spinbox.current(current)
+
+
+	def update(self, selection=None, msg="", event=False):
+		print("update: %s" % (msg))
+		if not event:
+			self.gadget_definitions_spinbox(selection=selection)
 		# print("Editor:update", file=sys.stderr)
 		# sleep(1)
 		self.tabs.nb_update()
-		#self.gadget_definitions_spinbox()
-		self.gadget_spinbox_postcommand()
+		#self.gadget_spinbox_postcommand()
+		#self.gadget_spinbox_update(None, "UPDATE")
+		#self.udc_status_set()
 		self.udc_button_set()
 		self.gadget_auto_serialnumber_set()
 		self.gadget_enable_button_set()
 		self.gadget_add_button_set()
 		self.gadget_remove_button_set()
 
+	# udc status - attach and detach
+	# display current UDC State as label
+	#def udc_status_set(self):
+	#	print("=============================================")
+	#	print("udc_status_set: %s" % self.m.query_udc_state(), file=sys.stderr)
+	#	self.udc_button['text'] = "%s\n%s" % (self.m.query_udc_state(), self.m.query_udc_function())
+	#	gadget = self.m.query_gadget()
+	#	if self.m.query_udc_state() == 'configured':
+	#		self.udc_status['text'] = "%s Configured" % (gadget)
+	#		self.udc_status['bg'] = 'Light Green'
+	#	else:
+	#		gadget = self.m.query_gadget()
+	#		# print("statustton_set: %s" % self.m.query_gadget(), file=sys.stderr)
+	#		if gadget is None:
+	#			self.udc_status['text'] = ""
+	#			self.udc_status['bg'] = 'Dark Grey'
+	#		else:
+	#			self.udc_status['text'] = "%s Detached" % (gadget)
+	#			self.udc_status['bg'] = 'Light Blue'
+	#
 	# udc button - attach and detach
 	# display current UDC State as label
+	#def udc_button_set(self):
+	#	print("=============================================")
+	#	print("udc_button_set: %s" % self.m.query_udc_state(), file=sys.stderr)
+	#	self.udc_button['text'] = "%s\n%s" % (self.m.query_udc_state(), self.m.query_udc_function())
+	#	if self.m.query_udc_state() == 'configured':
+	#		self.udc_button['text'] = "Click to detach"
+	#		self.udc_button['bg'] = 'Light Green'
+	#	else:
+	#		gadget = self.m.query_gadget()
+	#		# print("udc_button_set: %s" % self.m.query_gadget(), file=sys.stderr)
+	#		if gadget is None:
+	#			self.udc_button['text'] = ""
+	#			self.udc_button['bg'] = 'Dark Grey'
+	#		else:
+	#			self.udc_button['text'] = "Click to attach"
+	#			self.udc_button['bg'] = 'Light Blue'
+
+       	# udc button - attach and detach
+        # display current UDC State as label
 	def udc_button_set(self):
-		# print("udc_button_set: %s" % self.m.query_udc_state(), file=sys.stderr)
+		print("=============================================")
+		print("udc_button_set: %s" % self.m.query_udc_state(), file=sys.stderr)
 		#self.udc_button['text'] = "%s\n%s" % (self.m.query_udc_state(), self.m.query_udc_function())
-		if self.m.query_udc_state() == 'configured':
-			self.udc_button['text'] = "Configured\n(Click to detach)"
+		gadget = self.m.query_gadget()
+		state = self.m.query_udc_state()
+		if state == 'configured':
+			self.udc_button['text'] = "%s\n%s" % (gadget, state)
 			self.udc_button['bg'] = 'Light Green'
 		else:
 			gadget = self.m.query_gadget()
@@ -287,14 +439,26 @@ class Editor:
 				self.udc_button['text'] = "UDC\n(No Gadget Defined)"
 				self.udc_button['bg'] = 'Dark Grey'
 			else:
-				self.udc_button['text'] = "UDC Detached\n(Click to attach)"
+				self.udc_button['text'] = "%s\n%s" % (gadget, state)
 				self.udc_button['bg'] = 'Light Blue'
 
+
+
+
+	#def udc_status_pressed(self):
+	#	print("udc_status_pressed: %s" % (self.m.query_udc_state()), file=sys.stderr)
+	#	#self.m.soft_connect(not fnmatch.fnmatch(self.udc_button['text'], 'Configured*'))
+	#	#self.udc_button_set()
+	#	#self.m.soft_connect(not fnmatch.fnmatch(self.udc_button['text'], 'Configured*'))
+	#	self.m.soft_connect(self.m.query_udc_state() != 'configured')
+	#	self.update(selection=None, msg="udc_status_pressed")
+
 	def udc_button_pressed(self):
-		# print("udc_button_pressed: %s" % (self.udc_button['text']), file=sys.stderr)
-		self.m.soft_connect(not fnmatch.fnmatch(self.udc_button['text'], 'Configured*'))
+		print("udc_button_pressed: %s" % (self.m.query_udc_state()), file=sys.stderr)
+		#self.m.soft_connect(not fnmatch.fnmatch(self.udc_button['text'], 'Configured*'))
+		self.m.soft_connect(self.m.query_udc_state() != 'configured')
 		#self.udc_button_set()
-		self.update()
+		self.update(selection=None, msg="udc_button_pressed")
 
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
@@ -302,40 +466,45 @@ class Editor:
 		#print("*****\ngadget_auto_serialnumber_set: %s" % (self.auto_serialnumber), file=sys.stderr)
 		if self.auto_serialnumber:
 			self.gadget_auto_serialnumber['bg'] = 'Light Green'
-			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Enabled'
+			self.gadget_auto_serialnumber['text'] = 'auto serialnumber'
 		else:
 			self.gadget_auto_serialnumber['bg'] = 'Light Grey'
-			self.gadget_auto_serialnumber['text'] = 'auto_serialnumber Disabled'
+			self.gadget_auto_serialnumber['text'] = 'auto serialnumber'
 
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
 	def gadget_enable_button_set(self):
-		# print("gadget_enable_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
+		print("gadget_enable_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
+		if (self.gadget_spinbox is None):
+			return
 		gadget = self.m.query_gadget()
-		current = self.gadget_spinbox.get().strip()
+		selection = self.gadget_spinbox.get().strip()
+		print("enable: selection: %s" % (selection))
 		if gadget is None:
-			if current == self.nodefstr:
-				t = "Enable"
+			if selection == self.no_def_str:
+				#t = "Enable"
+				self.gadget_enable_button['text'] = "Enable \"%s\"" % (selection)
 				self.gadget_enable_button['bg'] = 'Light Grey'
 			else:
-				t = "Enable \"%s\"" % (current)
+				self.gadget_enable_button['text'] = "Enable \"%s\"" % (selection)
 				self.gadget_enable_button['bg'] = 'Light Blue'
 		else:
-			if current == self.nodefstr:
-				t = "Disable" % (current)
+			if selection == self.no_def_str:
+				#t = "Disable %s" % (selection)
+				self.gadget_enable_button['text'] = ""
 				self.gadget_enable_button['bg'] = 'Light Grey'
-			elif current != gadget:
-				t = "Disable (%s not enabled)" % (current)
+			elif selection != gadget:
+				#t = "Disable (%s not enabled)" % (selection)
+				self.gadget_enable_button['text'] = ""
 				self.gadget_enable_button['bg'] = 'Light Grey'
 			else:
-				t = "Disable \"%s\"" % (gadget)
+				self.gadget_enable_button['text'] = "Disable \"%s\"" % (gadget)
 				self.gadget_enable_button['bg'] = 'Light Green'
-		self.gadget_enable_button['text'] = t
 
 	def gadget_auto_serialnumber_pressed(self):
 		print("*****\nauto_serialnumber_pressed: ", file=sys.stderr)
 		self.auto_serialnumber = not self.auto_serialnumber
-		self.update()
+		self.update(selection=None, msg="gadget_auto_serialnumber_pressed")
 
 	def gadget_enable_button_pressed(self):
 		# print("*****\ngadget_enable_button_pressed: ", file=sys.stderr)
@@ -343,18 +512,22 @@ class Editor:
 
 			if not self.m.disable_current():
 				messagebox.showerror(title="Error", message="Detach UDC from %s first" % (self.m.query_gadget()))
-			self.update()
+			self.update(selection=None, msg="gadget_enable_button_pressed query_gadget NONE")
 			return
 
 		# print("gadget_enable_button_pressed: gadget selection: %s" % (self.gadget_spinbox.get().strip()), file=sys.stderr)
 		self.m.enable_current(self.gadget_spinbox.get().strip())
 		#self.gadget_enable_button_set()
 		#self.udc_button_set()
-		self.update()
+		self.update(selection=None, msg="gadget_enable_button_pressed")
 
 	def gadget_add_button_set(self):
-		# print("gadget_add_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
 		self.gadget_add_button['bg'] = 'Light Blue'
+		self.gadget_ecm_button['bg'] = 'Light Blue'
+		self.gadget_eem_button['bg'] = 'Light Blue'
+		self.gadget_eth_button['bg'] = 'Light Blue'
+		self.gadget_ncm_button['bg'] = 'Light Blue'
+		self.gadget_rndis_button['bg'] = 'Light Blue'
 		pass
 
 	def get_new_device_name(self, file):
@@ -369,24 +542,14 @@ class Editor:
 			if not self.m.check_device_name(new_device_name):
 				return new_device_name
 
-	def gadget_add_button_pressed(self):
-		#print("gadget_add_button_pressed:", file=sys.stderr)
 
+	def add_definition(self, filetypes=None):
+		#print("filetypes: %s" % (filetypes))
 		f = filedialog.askopenfilename(
 			initialdir=self.initialdir,
 			title="Select Gadget Definition File",
 			#filetypes=(("json files", "rndis*.json"), ("all files", "*.*")))
-			filetypes=(
-				("all files", "*.*"),
-				("eem*", "eem*.json"), 
-				("ecm*", "eem*.json"), 
-				("ncm*", "eem*.json"), 
-				("rndis*", "rndis*.json"),
-				("*eem*", "*eem*.json"), 
-				("*ecm*", "*eem*.json"), 
-				("*ncm*", "*eem*.json"), 
-				("*rndis*", "*rndis*.json")
-				))
+			filetypes=filetypes)
 
 		if f is None:
 			return
@@ -410,77 +573,86 @@ class Editor:
 			self.m.add_device_file(f, new_device_name=new_device_name, auto_serialnumber=self.auto_serialnumber)
 		except FileExistsError:
 			messagebox.showerror(title="Error", message="Gadget Definition for %s already exists!" % (self.m.check_device_file(f)))
-		#self.gadget_definitions_spinbox()
-		new = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
 
+		#self.gadget_definitions_spinbox()
+
+		new = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
 		added = [item for item in new if item not in old]
-		self.gadget_spinbox_update(added[0])
+		#self.gadget_spinbox_update(added[0], "ADD")
 		self.notebook()
-		self.update()
+		self.update(selection=added[0], msg="add_definition")
+
+	def gadget_add_button_pressed(self):
+		filetypes=(
+			("all files", "*.*"),
+			("eem*", "eem*.json"), 
+			("ecm*", "eem*.json"), 
+			("ncm*", "eem*.json"), 
+			("rndis*", "rndis*.json"),
+			("*eem*", "*eem*.json"), 
+			("*ecm*", "*eem*.json"), 
+			("*ncm*", "*eem*.json"), 
+			("*rndis*", "*rndis*.json")
+			)
+		self.add_definition(filetypes)
+
+	def gadget_ecm_button_pressed(self):
+		filetypes=( ("ecm*", "ecm*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
+
+	def gadget_eem_button_pressed(self):
+		filetypes=( ("eem*", "eem*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
+
+	def gadget_eth_button_pressed(self):
+		filetypes=( ("eth*", "eth*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
+
+	def gadget_ncm_button_pressed(self):
+		filetypes=( ("ncm*", "ncm*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
+
+	def gadget_rndis_button_pressed(self):
+		filetypes=( ("rndis*", "rndis*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
 
 	def gadget_remove_button_set(self):
-		current = self.gadget_spinbox.get().strip()
-		if current == self.m.query_gadget():
-			self.gadget_remove_button['text'] = "Cannot Remove \"%s\" (disable first)" % (current)
-			self.gadget_remove_button['bg'] = 'Light Pink'
-		elif current == self.nodefstr:
+		if (self.gadget_spinbox is None):
+			return
+		gadget = self.m.query_gadget()
+		selection = self.gadget_spinbox.get().strip()
+		print("remove: gadget: %s" % (gadget))
+		print("remove: selection: %s" % (selection))
+		#print("remove: no_def_str: %s" % (self.no_def_str))
+		if selection == self.m.query_gadget():
+			#self.gadget_remove_button['text'] = "Cannot Remove \"%s\" (disable first)" % (selection)
+			self.gadget_remove_button['text'] = ""
+			self.gadget_remove_button['bg'] = 'Light Grey'
+		elif selection == self.no_def_str:
 			self.gadget_remove_button['text'] = "Remove"
 			self.gadget_remove_button['bg'] = 'Light Grey'
 		else:
-			self.gadget_remove_button['text'] = "Remove \"%s\"" % (current)
+			self.gadget_remove_button['text'] = "Remove \"%s\"" % (selection)
 			self.gadget_remove_button['bg'] = 'Light Blue'
 
 	def gadget_remove_button_pressed(self):
+		if (self.gadget_spinbox is None):
+			return
 		if self.gadget_spinbox.get().strip() == self.m.query_gadget():
 			messagebox.showerror(title="Error", message="Disable %s first" % (self.m.query_gadget()))
 			return
 		r = RemoveGadget(self.m.configpath, self.m)
 		r.remove_device(self.gadget_spinbox.get().strip())
-		self.gadget_spinbox_postcommand()
+		#self.gadget_spinbox_postcommand()
+		#self.gadget_definitions_spinbox()
+		#self.gadget_spinbox_update(None, "REMOVE")
 		self.notebook()
-		self.update()
-
-	# gadget_definitions_spinbox
-	# this needs to be created new for each change in the gadgets list
-	def gadget_definitions_spinbox(self):
-
-		self.gadget_spinbox_title = tk.Label(self.tk, text='<-- Select Gadget Device Definition',
-				font=tkFont.Font(family='Helvetica', size=8), anchor='ne', justify='left')
-		
-		self.gadget_spinbox = ttk.Combobox(self.tk, state="readonly", 
-				values=[self.nodefstr], height=4, postcommand=self.gadget_spinbox_postcommand,
-				font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
-
-		self.gadget_spinbox_title.grid(row=1, rowspan=1, column=9, columnspan=1, sticky=tk.W, padx=(0, 1), pady=(4, 0))
-		self.gadget_spinbox.grid(row=1, rowspan=1, column=2, columnspan=7, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
-
-		self.gadget_spinbox.bind("<<ComboboxSelected>>", self.gadget_spinbox_command)
-		self.gadget_spinbox_postcommand()
-
-
-	def gadget_spinbox_command(self, arg):
-		# print("gadget_spinbox_command: arg: %s " % (arg), file=sys.stderr)
-		self.update()
-
-	def gadget_spinbox_postcommand(self):
-		self.gadget_spinbox_update(None)
-
-	def gadget_spinbox_update(self, selected):
-		self.gadget_spinbox.selection_clear()
-		current = self.gadget_spinbox.current()
-		if selected is None:
-			selected = self.gadget_spinbox.get()
-		v = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
-		if len(v) == 0:
-			v.append(self.nodefstr)
-		self.gadget_spinbox['values'] = v
-		self.gadget_spinbox.current(0)
-		if selected in v:
-			self.gadget_spinbox.current(v.index(selected))
-
+		self.update(selection=None, msg="gadget_remove_button_pressed")
 	def doFoo(self, event):
-		# print("doFoo: %s " % (event), file=sys.stderr)
-		self.update()
+		print("doFoo: %s " % (event), file=sys.stderr)
+		self.update(selection=None, msg="doFoo", event=True)
+		#self.udc_button_set()
+		return
 
 	def setExitFlag(self):
 		# print("setExitFlag:", file=sys.stderr)
@@ -494,29 +666,53 @@ class Editor:
 		if self.location:
 			self.tk.geometry("700x660" + self.location)
 		else:
-			self.tk.geometry("700x660")
+			self.tk.geometry("560x660")
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
 
 		# the spinbox is created and recreated on the fly to respond to the current list of gadgets
-		self.gadget_definitions_spinbox()
+		#self.gadget_definitions_spinbox()
 
-		self.gadget_auto_serialnumber = tk.Button(self.tk, text='auto_serialnumber', command=self.gadget_auto_serialnumber_pressed, width=28, anchor='w')
+		self.gadget_auto_serialnumber = tk.Button(self.tk, text='auto_serialnumber', command=self.gadget_auto_serialnumber_pressed, width=20, anchor='w')
 
-		self.gadget_enable_button = tk.Button(self.tk, text='', command=self.gadget_enable_button_pressed, width=28, anchor='w')
-		self.gadget_remove_button = tk.Button(self.tk, text='', command=self.gadget_remove_button_pressed, width=28, anchor='w')
+		self.gadget_enable_button = tk.Button(self.tk, text='', command=self.gadget_enable_button_pressed, width=20, anchor='w')
+		self.gadget_remove_button = tk.Button(self.tk, text='', command=self.gadget_remove_button_pressed, width=20, anchor='w')
+
 
 		self.gadget_add_button = tk.Button(self.tk, text='Add definition', command=self.gadget_add_button_pressed, width=1, anchor='center')
+		self.gadget_ecm_button = tk.Button(self.tk, text='ECM', command=self.gadget_ecm_button_pressed, width=4, anchor='center')
+		self.gadget_eem_button = tk.Button(self.tk, text='EEM', command=self.gadget_eem_button_pressed, width=4, anchor='center')
+		self.gadget_eth_button = tk.Button(self.tk, text='ETH', command=self.gadget_eth_button_pressed, width=4, anchor='center')
+		self.gadget_ncm_button = tk.Button(self.tk, text='NCM', command=self.gadget_ncm_button_pressed, width=4, anchor='center')
+		self.gadget_rndis_button = tk.Button(self.tk, text='RNDIS', command=self.gadget_rndis_button_pressed, width=4, anchor='center')
+
+		#self.udc_status = tk.Button(self.tk, text='-', command=self.udc_status_pressed, width=14, anchor='center')
 		self.udc_button = tk.Button(self.tk, text='-', command=self.udc_button_pressed, width=14, anchor='center')
 
-		self.udc_button.grid(row=1, rowspan=2, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_add_button.grid(row=3, rowspan=1, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		#self.gadget_spinbox_title = tk.Label(self.tk, text='<-- Select Gadget Device Definition',
+		#		font=tkFont.Font(family='Helvetica', size=8), anchor='ne', justify='left')
 
-		self.gadget_auto_serialnumber.grid(row=1, rowspan=1, column=9, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_enable_button.grid(row=2, rowspan=1, column=2, columnspan=8, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_remove_button.grid(row=3, rowspan=1, column=2, columnspan=8, sticky=tk.NSEW, pady=(1, 1))
+		# row 1
+		#self.udc_status.grid(                 row=1, rowspan=1, column=1, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
+		#self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=4, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
+		self.udc_button.grid(                 row=1, rowspan=2, column=1, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_auto_serialnumber.grid(   row=1, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 
+		# row 2
+		self.gadget_enable_button.grid(       row=2, rowspan=1, column=4, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_remove_button.grid(       row=2, rowspan=1, column=6, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
+
+		# row 3
+		self.gadget_ecm_button.grid(          row=3, rowspan=1, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_eem_button.grid(          row=3, rowspan=1, column=2, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_eth_button.grid(          row=3, rowspan=1, column=3, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_ncm_button.grid(          row=3, rowspan=1, column=4, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_rndis_button.grid(        row=3, rowspan=1, column=5, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_add_button.grid(          row=3, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+
+
+		#self.udc_status_set()
 		self.udc_button_set()
 		self.gadget_auto_serialnumber_set()
 		self.gadget_enable_button_set()
@@ -533,6 +729,8 @@ class Editor:
 
 		# the Notebook is created and recreated on the fly to respond to the current list of gadgets
 		self.notebook()
+
+		self.update(selection=None, msg="tk")
 
 	# gadget_notebook
 	# this needs to be created new for each change in the gadgets list
