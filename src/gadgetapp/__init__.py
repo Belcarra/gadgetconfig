@@ -178,7 +178,7 @@ class Tabs:
 		self._nextID += 1
 
 		newTabFrame = Frame(self.nb)
-		text = Text(newTabFrame, font=self.customFont, width=680, height=520)
+		text = Text(newTabFrame, font=self.customFont, width=540, height=520)
 		text.pack()
 		text.insert(INSERT, "...")
 		self.textlist.append(text)
@@ -213,7 +213,8 @@ class Tabs:
 		s = ''
 		if self.currentID == 1:
 			s = sysfs(['/sys/devices/platform/soc'], -1,
-				include=["*.usb", ["udc"], [], ["soft_connect", "function", "maximum_speed", "state", "uevent"]])
+				include=["*.usb", ["udc"], [], ["soft_connect", "function", "maximum_speed", "state", "uevent"]],
+				bold=[["*"], ["UDC"]])
 
 		elif self.currentID == 0:
 			s = sysfs(['/sys/kernel/config/usb_gadget/'], 4, 
@@ -278,7 +279,7 @@ class Editor:
 				print("gadget_definitions_spinbox: ------------ selection: %s updated" % (selection))
 		
 		self.gadget_spinbox = ttk.Combobox(self.tk, state="readonly", 
-				values=[self.no_def_str], height=4, postcommand=self.gadget_spinbox_postcommand, width=10,
+				values=[self.no_def_str], height=4, postcommand=self.gadget_spinbox_postcommand, width=9,
 				font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
 
 		self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=2, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
@@ -664,9 +665,9 @@ class Editor:
 		self.tk.bind("<Button-1>", self.doFoo)
 		self.tk.bind("<Button-3>", self.doFoo)
 		if self.location:
-			self.tk.geometry("700x660" + self.location)
+			self.tk.geometry("550x660" + self.location)
 		else:
-			self.tk.geometry("560x660")
+			self.tk.geometry("550x660")
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
@@ -674,13 +675,13 @@ class Editor:
 		# the spinbox is created and recreated on the fly to respond to the current list of gadgets
 		#self.gadget_definitions_spinbox()
 
-		self.gadget_auto_serialnumber = tk.Button(self.tk, text='auto_serialnumber', command=self.gadget_auto_serialnumber_pressed, width=20, anchor='w')
+		self.gadget_auto_serialnumber = tk.Button(self.tk, text='auto_serialnumber', command=self.gadget_auto_serialnumber_pressed, width=18, anchor='w')
 
-		self.gadget_enable_button = tk.Button(self.tk, text='', command=self.gadget_enable_button_pressed, width=20, anchor='w')
-		self.gadget_remove_button = tk.Button(self.tk, text='', command=self.gadget_remove_button_pressed, width=20, anchor='w')
+		self.gadget_enable_button = tk.Button(self.tk, text='', command=self.gadget_enable_button_pressed, width=18, anchor='w')
+		self.gadget_remove_button = tk.Button(self.tk, text='', command=self.gadget_remove_button_pressed, width=18, anchor='w')
 
 
-		self.gadget_add_button = tk.Button(self.tk, text='Add definition', command=self.gadget_add_button_pressed, width=1, anchor='center')
+		self.gadget_add_button = tk.Button(self.tk, text='Add definition', command=self.gadget_add_button_pressed, width=18, anchor='center')
 		self.gadget_ecm_button = tk.Button(self.tk, text='ECM', command=self.gadget_ecm_button_pressed, width=4, anchor='center')
 		self.gadget_eem_button = tk.Button(self.tk, text='EEM', command=self.gadget_eem_button_pressed, width=4, anchor='center')
 		self.gadget_eth_button = tk.Button(self.tk, text='ETH', command=self.gadget_eth_button_pressed, width=4, anchor='center')
