@@ -245,7 +245,7 @@ class Tabs:
 # Editor
 #
 class Editor:
-	def __init__(self, manage=None, location=None, auto_serialnumber=False):
+	def __init__(self, manage=None, location=None, auto_serialnumber=True):
 
 		self.exitFlag = False
 		self.tabs = None
@@ -282,7 +282,7 @@ class Editor:
 				values=[self.no_def_str], height=4, postcommand=self.gadget_spinbox_postcommand, width=9,
 				font=tkFont.Font(family='Helvetica', size=10, weight='bold'))
 
-		self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=2, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
+		self.gadget_spinbox.grid(             row=1, rowspan=1, column=3, columnspan=3, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
 
 		self.gadget_spinbox.bind("<<ComboboxSelected>>", self.gadget_spinbox_command)
 
@@ -437,7 +437,7 @@ class Editor:
 			gadget = self.m.query_gadget()
 			# print("udc_button_set: %s" % self.m.query_gadget(), file=sys.stderr)
 			if gadget is None:
-				self.udc_button['text'] = "UDC\n(No Gadget Defined)"
+				self.udc_button['text'] = "UDC\n(No Gadget)"
 				self.udc_button['bg'] = 'Dark Grey'
 			else:
 				self.udc_button['text'] = "%s\n%s" % (gadget, state)
@@ -527,6 +527,7 @@ class Editor:
 		self.gadget_ecm_button['bg'] = 'Light Blue'
 		self.gadget_eem_button['bg'] = 'Light Blue'
 		self.gadget_eth_button['bg'] = 'Light Blue'
+		self.gadget_mdlm_button['bg'] = 'Light Blue'
 		self.gadget_ncm_button['bg'] = 'Light Blue'
 		self.gadget_rndis_button['bg'] = 'Light Blue'
 		pass
@@ -609,6 +610,10 @@ class Editor:
 		filetypes=( ("eth*", "eth*.json"), ("all files", "*.*"),)
 		self.add_definition(filetypes)
 
+	def gadget_mdlm_button_pressed(self):
+		filetypes=( ("mdlm*", "mdlm*.json"), ("all files", "*.*"),)
+		self.add_definition(filetypes)
+
 	def gadget_ncm_button_pressed(self):
 		filetypes=( ("ncm*", "ncm*.json"), ("all files", "*.*"),)
 		self.add_definition(filetypes)
@@ -685,6 +690,7 @@ class Editor:
 		self.gadget_ecm_button = tk.Button(self.tk, text='ECM', command=self.gadget_ecm_button_pressed, width=4, anchor='center')
 		self.gadget_eem_button = tk.Button(self.tk, text='EEM', command=self.gadget_eem_button_pressed, width=4, anchor='center')
 		self.gadget_eth_button = tk.Button(self.tk, text='ETH', command=self.gadget_eth_button_pressed, width=4, anchor='center')
+		self.gadget_mdlm_button = tk.Button(self.tk, text='MDLM', command=self.gadget_mdlm_button_pressed, width=4, anchor='center')
 		self.gadget_ncm_button = tk.Button(self.tk, text='NCM', command=self.gadget_ncm_button_pressed, width=4, anchor='center')
 		self.gadget_rndis_button = tk.Button(self.tk, text='RNDIS', command=self.gadget_rndis_button_pressed, width=4, anchor='center')
 
@@ -697,20 +703,21 @@ class Editor:
 		# row 1
 		#self.udc_status.grid(                 row=1, rowspan=1, column=1, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
 		#self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=4, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
-		self.udc_button.grid(                 row=1, rowspan=2, column=1, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_auto_serialnumber.grid(   row=1, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.udc_button.grid(                 row=1, rowspan=2, column=1, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_auto_serialnumber.grid(   row=1, rowspan=1, column=6, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
 
 		# row 2
-		self.gadget_enable_button.grid(       row=2, rowspan=1, column=4, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_enable_button.grid(       row=2, rowspan=1, column=3, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_remove_button.grid(       row=2, rowspan=1, column=6, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
 
 		# row 3
 		self.gadget_ecm_button.grid(          row=3, rowspan=1, column=1, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_eem_button.grid(          row=3, rowspan=1, column=2, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_eth_button.grid(          row=3, rowspan=1, column=3, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_ncm_button.grid(          row=3, rowspan=1, column=4, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_rndis_button.grid(        row=3, rowspan=1, column=5, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_add_button.grid(          row=3, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_mdlm_button.grid(          row=3, rowspan=1, column=4, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_ncm_button.grid(          row=3, rowspan=1, column=5, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_rndis_button.grid(        row=3, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_add_button.grid(          row=3, rowspan=1, column=7, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 
 
 		#self.udc_status_set()
@@ -748,21 +755,21 @@ def main():
 		formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=999))
 
 	parser.add_argument("--location", type=str, help="Optional window location +x+y")
-	parser.add_argument("--auto_serialnumber", action='store_true', help="Enable auto_serialnumber mode")
+	parser.add_argument("--no_auto_serialnumber", action='store_false', help="Disable auto_serialnumber mode")
 
 	args = parser.parse_args()
 
 	print('location: %s' % (args.location))
 
 	sys_config_path = "/sys/kernel/config/usb_gadget"
-	#m = ManageGadget(sys_config_path, auto_serialnumber=args.auto_serialnumber)
+	#m = ManageGadget(sys_config_path, auto_serialnumber=args.no_auto_serialnumber)
 	m = ManageGadget(sys_config_path)
 
 	print('realudcpath: %s' % (m.query_udc_path()))
 	w = watch(m.query_udc_path())
 	w._start()
 
-	e = Editor(manage=m, location=args.location, auto_serialnumber=args.auto_serialnumber)
+	e = Editor(manage=m, location=args.location, auto_serialnumber=args.no_auto_serialnumber)
 	e.tk()
 
 	# replacement for tk.mainloop() 
