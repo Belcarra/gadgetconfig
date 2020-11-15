@@ -166,7 +166,7 @@ class Tabs:
 		self.nb_update_tablist()
 
 	def nbFoo(self, event):
-		print("nbFoo: %s " % (event), file=sys.stderr)
+		#print("nbFoo: %s " % (event), file=sys.stderr)
 		self.update(selection=None, msg="nbFoo")
 
 	def add_tab(self, name):
@@ -263,7 +263,8 @@ class Editor:
 		self.auto_serialnumber = auto_serialnumber
 
 	def onevent(self, event):
-		print("onevent: %s" % (event))
+		#print("onevent: %s" % (event))
+		pass
 
 	def event(self):
 		self.tk.event_generate("<<FOO>>", when="now")
@@ -272,11 +273,11 @@ class Editor:
 	# this needs to be created new for each change in the gadgets list
 	def gadget_definitions_spinbox(self, selection=None):
 
-		print("gadget_definitions_spinbox: ------------ selection: %s" % (selection))
+		#print("gadget_definitions_spinbox: ------------ selection: %s" % (selection))
 		if selection is None:
 			if self.gadget_spinbox is not None:
 				selection = self.gadget_spinbox.get().strip()
-				print("gadget_definitions_spinbox: ------------ selection: %s updated" % (selection))
+				#print("gadget_definitions_spinbox: ------------ selection: %s updated" % (selection))
 		
 		self.gadget_spinbox = ttk.Combobox(self.tk, state="readonly", 
 				values=[self.no_def_str], height=4, postcommand=self.gadget_spinbox_postcommand, width=9,
@@ -290,28 +291,29 @@ class Editor:
 		if len(v) == 0:
 			self.gadget_spinbox['values'] = self.no_def_str
 			self.gadget_spinbox.current(0)
-			print("gadgets_definitions_spinbox: setting values: %s" % (self.no_def_str))
-			print("------------")
+			#print("gadgets_definitions_spinbox: setting values: %s" % (self.no_def_str))
+			#print("------------")
 			return
 
 		self.gadget_spinbox['values'] = v
-		print("gadgets_definitions_spinbox: setting values: %s" % (v))
+		#print("gadgets_definitions_spinbox: setting values: %s" % (v))
 
 		if selection is None:
 			selection = self.m.query_gadget()
-			print("gadgets_definitions_spinbox: selection from query %s" % (selection))
+			#print("gadgets_definitions_spinbox: selection from query %s" % (selection))
 		else:
-			print("gadgets_definitions_spinbox: selection %s" % (selection))
+			#print("gadgets_definitions_spinbox: selection %s" % (selection))
+			pass
 
 		if selection in v:
-			print("gadget_definitions_spinbox: current: %d" % (v.index(selection)))
+			#print("gadget_definitions_spinbox: current: %d" % (v.index(selection)))
 			self.gadget_spinbox.current(v.index(selection))
-			print("------------")
+			#print("------------")
 			return
 
-		print("gadget_definitions_spinbox: selection not found")
+		#print("gadget_definitions_spinbox: selection not found")
 		self.gadget_spinbox.current(0)
-		print("------------")
+		#print("------------")
 
 		# get list of all gadgets, will include selected
 
@@ -319,9 +321,9 @@ class Editor:
 	def gadget_spinbox_command(self, arg):
 		selection = self.gadget_spinbox.get().strip()
 		current = self.gadget_spinbox.current()
-		print("gadget_spinbox_command: arg: %s current: %d selection: %s" % (arg, current, selection), file=sys.stderr)
+		#print("gadget_spinbox_command: arg: %s current: %d selection: %s" % (arg, current, selection), file=sys.stderr)
 		self.update(selection=selection, msg="gadget_spinbox_command")
-		print("gadget_spinbox_command: current: %d -------------------------------------------" % (current))
+		#print("gadget_spinbox_command: current: %d -------------------------------------------" % (current))
 		return
 		v = self.gadget_spinbox['values']
 		#v = self.spinboxvalues
@@ -331,19 +333,19 @@ class Editor:
 	def gadget_spinbox_postcommand(self):
 		selection = self.gadget_spinbox.get().strip()
 		current = self.gadget_spinbox.current()
-		print("gadget_spinbox_postcommand: current: %d selection: %s" % (current, selection), file=sys.stderr)
+		#print("gadget_spinbox_postcommand: current: %d selection: %s" % (current, selection), file=sys.stderr)
 		#self.gadget_spinbox_update(None, "POST")
 
 	def gadget_spinbox_update(self, selected, msg):
 		return
 		self.gadget_spinbox.selection_clear()
 		current = self.gadget_spinbox.current()
-		print("gadget_spinbox_update: selected: %s current: %d ------------------------------------------- %s" % (selected, current, msg))
+		#print("gadget_spinbox_update: selected: %s current: %d ------------------------------------------- %s" % (selected, current, msg))
 		return
 
 		if selected is None:
 			selected = self.gadget_spinbox.get()
-			print("gadget_spinbox_update: selected: %s GET" % (selected))
+			#print("gadget_spinbox_update: selected: %s GET" % (selected))
 		else:
 			v = self.gadget_spinbox['values']
 			#v = self.spinboxvalues
@@ -361,14 +363,14 @@ class Editor:
 		#self.gadget_spinbox.current(0)
 
 		if selected in v:
-			print("gadget_spinbox_update: current: %d" % (v.index(selected)))
+			#print("gadget_spinbox_update: current: %d" % (v.index(selected)))
 			self.gadget_spinbox.current(v.index(selected))
 		else:
 			self.gadget_spinbox.current(current)
 
 
 	def update(self, selection=None, msg="", event=False):
-		print("update: %s" % (msg))
+		#print("update: %s" % (msg))
 		if not event:
 			self.gadget_definitions_spinbox(selection=selection)
 		# print("Editor:update", file=sys.stderr)
@@ -425,8 +427,8 @@ class Editor:
        	# udc button - attach and detach
         # display current UDC State as label
 	def udc_button_set(self):
-		print("=============================================")
-		print("udc_button_set: %s" % self.m.query_udc_state(), file=sys.stderr)
+		#print("=============================================")
+		#print("udc_button_set: %s" % self.m.query_udc_state(), file=sys.stderr)
 		#self.udc_button['text'] = "%s\n%s" % (self.m.query_udc_state(), self.m.query_udc_function())
 		gadget = self.m.query_gadget()
 		state = self.m.query_udc_state()
@@ -455,7 +457,7 @@ class Editor:
 	#	self.update(selection=None, msg="udc_status_pressed")
 
 	def udc_button_pressed(self):
-		print("udc_button_pressed: %s" % (self.m.query_udc_state()), file=sys.stderr)
+		#print("udc_button_pressed: %s" % (self.m.query_udc_state()), file=sys.stderr)
 		#self.m.soft_connect(not fnmatch.fnmatch(self.udc_button['text'], 'Configured*'))
 		self.m.soft_connect(self.m.query_udc_state() != 'configured')
 		#self.udc_button_set()
@@ -475,16 +477,17 @@ class Editor:
 	# gadget button - enable and disable
 	# display currently Enabled Gadget as label
 	def gadget_enable_button_set(self):
-		print("gadget_enable_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
+		#print("gadget_enable_button_set: %s" % (self.m.query_gadget()), file=sys.stderr)
 		if (self.gadget_spinbox is None):
 			return
 		gadget = self.m.query_gadget()
 		selection = self.gadget_spinbox.get().strip()
-		print("enable: selection: %s" % (selection))
+		#print("enable: selection: %s" % (selection))
 		if gadget is None:
 			if selection == self.no_def_str:
 				#t = "Enable"
-				self.gadget_enable_button['text'] = "Enable \"%s\"" % (selection)
+				#self.gadget_enable_button['text'] = "Enable \"%s\"" % (selection)
+				self.gadget_enable_button['text'] = ""
 				self.gadget_enable_button['bg'] = 'Light Grey'
 			else:
 				self.gadget_enable_button['text'] = "Enable \"%s\"" % (selection)
@@ -503,7 +506,7 @@ class Editor:
 				self.gadget_enable_button['bg'] = 'Light Green'
 
 	def gadget_auto_serialnumber_pressed(self):
-		print("*****\nauto_serialnumber_pressed: ", file=sys.stderr)
+		#print("*****\nauto_serialnumber_pressed: ", file=sys.stderr)
 		self.auto_serialnumber = not self.auto_serialnumber
 		self.update(selection=None, msg="gadget_auto_serialnumber_pressed")
 
@@ -627,8 +630,8 @@ class Editor:
 			return
 		gadget = self.m.query_gadget()
 		selection = self.gadget_spinbox.get().strip()
-		print("remove: gadget: %s" % (gadget))
-		print("remove: selection: %s" % (selection))
+		#print("remove: gadget: %s" % (gadget))
+		#print("remove: selection: %s" % (selection))
 		#print("remove: no_def_str: %s" % (self.no_def_str))
 		if selection == self.m.query_gadget():
 			#self.gadget_remove_button['text'] = "Cannot Remove \"%s\" (disable first)" % (selection)
@@ -655,7 +658,7 @@ class Editor:
 		self.notebook()
 		self.update(selection=None, msg="gadget_remove_button_pressed")
 	def doFoo(self, event):
-		print("doFoo: %s " % (event), file=sys.stderr)
+		#print("doFoo: %s " % (event), file=sys.stderr)
 		self.update(selection=None, msg="doFoo", event=True)
 		#self.udc_button_set()
 		return
@@ -670,9 +673,9 @@ class Editor:
 		self.tk.bind("<Button-1>", self.doFoo)
 		self.tk.bind("<Button-3>", self.doFoo)
 		if self.location:
-			self.tk.geometry("550x660" + self.location)
+			self.tk.geometry("560x660" + self.location)
 		else:
-			self.tk.geometry("550x660")
+			self.tk.geometry("560x660")
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
@@ -704,7 +707,7 @@ class Editor:
 		#self.udc_status.grid(                 row=1, rowspan=1, column=1, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
 		#self.gadget_spinbox.grid(             row=1, rowspan=1, column=4, columnspan=4, sticky=tk.NSEW, padx=(8, 0), pady=(1, 4))
 		self.udc_button.grid(                 row=1, rowspan=2, column=1, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_auto_serialnumber.grid(   row=1, rowspan=1, column=6, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_add_button.grid(          row=1, rowspan=1, column=6, columnspan=2, sticky=tk.NSEW, pady=(1, 1))
 
 		# row 2
 		self.gadget_enable_button.grid(       row=2, rowspan=1, column=3, columnspan=3, sticky=tk.NSEW, pady=(1, 1))
@@ -717,7 +720,7 @@ class Editor:
 		self.gadget_mdlm_button.grid(          row=3, rowspan=1, column=4, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_ncm_button.grid(          row=3, rowspan=1, column=5, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 		self.gadget_rndis_button.grid(        row=3, rowspan=1, column=6, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
-		self.gadget_add_button.grid(          row=3, rowspan=1, column=7, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
+		self.gadget_auto_serialnumber.grid(   row=3, rowspan=1, column=7, columnspan=1, sticky=tk.NSEW, pady=(1, 1))
 
 
 		#self.udc_status_set()
@@ -759,13 +762,13 @@ def main():
 
 	args = parser.parse_args()
 
-	print('location: %s' % (args.location))
+	#print('location: %s' % (args.location))
 
 	sys_config_path = "/sys/kernel/config/usb_gadget"
 	#m = ManageGadget(sys_config_path, auto_serialnumber=args.no_auto_serialnumber)
 	m = ManageGadget(sys_config_path)
 
-	print('realudcpath: %s' % (m.query_udc_path()))
+	#print('realudcpath: %s' % (m.query_udc_path()))
 	w = watch(m.query_udc_path())
 	w._start()
 
