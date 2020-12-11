@@ -53,7 +53,9 @@ class AddGadget(object):
 			exit(1)
 		except (PermissionError):
 			self.vprint("%s %s PERMISSION DENIED" % (path, s.strip()))
-			exit(1)
+			# N.B. some configuration items are read only, e.g. functions/hid.usb0/dev
+			#exit(1)
+			pass
 
 	def write_bytes(self, path, bytes):
 		self.vprint("write_bytes: %s \"%s\"" % (path, bytes))
