@@ -153,7 +153,7 @@ class Tabs:
 		self.frame = Frame(self.tk)
 		self.frame.grid(row=5, rowspan=2, column=1, columnspan=10, sticky="nsew")
 
-		self.nb = Notebook(self.frame, width=640, height=520)
+		self.nb = Notebook(self.frame, width=610, height=520)
 		self.nb.bind("<ButtonRelease-1>", self.nb_test)
 		self.nb.bind("<<NotebookTabChanged>>", self.nb_test)
 		self.nb.pack(expand=1, fill='both')
@@ -178,7 +178,7 @@ class Tabs:
 		self._nextID += 1
 
 		newTabFrame = Frame(self.nb)
-		text = Text(newTabFrame, font=self.customFont, width=640, height=520)
+		text = Text(newTabFrame, font=self.customFont, width=610, height=520)
 		text.pack()
 		text.insert(INSERT, "...")
 		self.textlist.append(text)
@@ -673,9 +673,9 @@ class Editor:
 		self.tk.bind("<Button-1>", self.doFoo)
 		self.tk.bind("<Button-3>", self.doFoo)
 		if self.location:
-			self.tk.geometry("660x660" + self.location)
+			self.tk.geometry("636x660" + self.location)
 		else:
-			self.tk.geometry("660x660")
+			self.tk.geometry("636x660")
 		self.tk.call('encoding', 'system', 'utf-8')
 		self.tk.title("Gadget USB Device Configuration - %s" % (os.uname()[1]))
 		self.tk.protocol("WM_DELETE_WINDOW", self.setExitFlag)
