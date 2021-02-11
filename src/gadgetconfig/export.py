@@ -179,7 +179,7 @@ class ExportGadget(object):
 						'# bmAttributes: bit 5 support remote wakeup': '',
 						'# bmAttributes: bit 6 self-powered': '',
 						'# bmAttributes: bit 7 bus-powered': '',
-						'# MaxPower: Power requirements in two-milliampere units, only valid of bit 7 is set': '',
+						'# MaxPower: Power requirements in two-milliampere units, only valid if bit 7 is set': '',
 					})
 			for entry in config_entries:
 				epath = "%s/%s" % (config_path, entry)
