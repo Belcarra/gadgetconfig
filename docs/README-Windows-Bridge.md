@@ -40,14 +40,15 @@ This issue may occur if Windows Management Instrumentation (WMI) repository is b
 1. Right click on Start Button and choose Command Prompt (Admin). In case if you’re using Windows 8.1/7, you can open Command Prompt using Windows Search.
 
 2. In administrative Command Prompt window, type following commands (mentioned in bold) one-by-one and press Enter key after each:
-
+```
 net stop winmgmt
+```
 Note: IP Helper service is dependent upon Windows Management Instrumentation service. So while stopping WMI service, you will be asked to terminate IP Helper service first, so do the needful. If Windows fails to terminate WMI service then, retry above mentioned stop command.
-
+```
 cd /d %windir%\system32\wbem
 ren repository repository.old
 net start winmgmt
-
+```
 3. Close Command Prompt. Windows may take few minutes to rebuild WMI database. After waiting a while, reboot your system.
 
 After restarting your machine, issue will no longer appear.
