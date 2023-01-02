@@ -87,10 +87,10 @@ The *gadgetconfig* program uses USB Device definitions stored in *JSON* files.
 
 When using the Gadget Libcomposite module:
 
-- Create: *gadgetconfig --create gadget-definition.json*
+- Create: *gadgetconfig --add gadget-definition.json*
 - Enable: *gadgetconfig --enable configuration_name*
 - Disable: *gadgetconfig --disable*
-- Destroy: *gadgetconfig --destroy*
+- Destroy: *gadgetconfig --remove*
 
 Gadget UDC:
 - Disconnect: *gadgetconfig --soft_connect disconnect*
@@ -106,7 +106,7 @@ Gadget UDC:
                   |       |
                   v       |
             +-------------------+
-            | Distabled Gadget  |<---
+            | Disabled Gadget  |<---
             +-------------------+   |
                   |                 | 
                   |                 |
