@@ -76,9 +76,14 @@ def sysfs(paths, maxlevel=-1, pinclude=[], pexclude=[], include=[], exclude=[], 
 # run systemctl to gather status info
 #
 def systemctl(service_name):
-	result = subprocess.run(['systemctl', 'status', 'getty@ttyGS0', 'getty@ttyGS1', 'gadget', '--lines', '0'], stdout=subprocess.PIPE)
+	result = subprocess.run(['systemctl', 'status', 'getty@ttyGS0', 'getty@ttyGS1', service_name, '--lines', '0'], stdout=subprocess.PIPE)
 	return result.stdout
 
+# dhcpcd
+# run dhcpcd --dumplease usb0
+def dhcpcd(interface_name):
+	result = subprocess.run(['dhcpcd', '--dumplease', interface_name, ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	return result.stdout
 
 # watch
 # start a process to watch for changes in /sys, set a flag if anything changes
@@ -159,7 +164,7 @@ class Tabs:
 		self.nb.pack(expand=1, fill='both')
 		self.nb.bind("<Button-3>", self.nbFoo)
 
-		self.tab_names = ["Gadget", "UDC State", "Systemd"]
+		self.tab_names = ["Gadget", "UDC State", "Systemd", "dhcpcd", ]
 		for n in self.tab_names:
 			self.add_tab(n)
 
@@ -229,6 +234,8 @@ class Tabs:
 					#include=[[], ["UDC", "idVendor", "idProduct"], ['strings'], ['0x409'], ['manufacturer']])
 		elif self.currentID == 2:
 			s = systemctl('gadget')
+		elif self.currentID == 3:
+			s = dhcpcd('usb0')
 		else:
 			s = sysfs(["/sys/kernel/config/usb_gadget/%s" % (self.tabIDs[self.currentID])], -1, sort=True)
 
