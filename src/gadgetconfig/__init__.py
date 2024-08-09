@@ -164,16 +164,19 @@ def main():
 
 	if args.disable:
 		m.disable_current()
+		exit(0)
 
 	if args.remove_all:
 		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		for g in m.query_gadgets():
 			print("Remove %s" % (g), file=sys.stderr)
 			r.remove_device(g)
+		exit(0)
 
 	if args.remove is not None:
 		r = RemoveGadget(sys_config_path, m, verbose=args.verbose)
 		r.remove_device(args.remove)
+		exit(0)
 
 	if args.sh is not None:
 		# print('add %s' % (args.name))
@@ -187,6 +190,7 @@ def main():
 	if args.add is not None:
 		# print('add %s' % (args.name))
 		m.add_device_file(args.add, new_device_name=args.name, args=args)
+		exit(0)
 
 	exit(1)
 
