@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Set encoding default for python 2.7
-# vim: syntax=python noexpandtab
+# vim: syntax=python expandtab
 #
 # N.B. tkinter appears to be installed by default for full raspbian desktop install (2020-01).
 #
@@ -82,7 +82,8 @@ def systemctl(service_name):
 # dhcpcd
 # run dhcpcd --dumplease usb0
 def dhcpcd(interface_name):
-	result = subprocess.run(['dhcpcd', '--dumplease', interface_name, ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	#result = subprocess.run(['dhcpcd', '--dumplease', interface_name, ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+	result = subprocess.run(['ifconfig', interface_name, ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 	return result.stdout
 
 # watch
@@ -164,7 +165,7 @@ class Tabs:
 		self.nb.pack(expand=1, fill='both')
 		self.nb.bind("<Button-3>", self.nbFoo)
 
-		self.tab_names = ["Gadget", "UDC State", "Systemd", "dhcpcd", ]
+		self.tab_names = ["Gadget", "UDC State", "Systemd", "usb0", ]
 		for n in self.tab_names:
 			self.add_tab(n)
 
@@ -790,6 +791,7 @@ def main():
 	# equivalent we can check the event flag set when something changes
 	# in the watched filesystem.
 	# 
+	count = 0
 	while not e.exitFlag:
 
 		# do the tkinter update
@@ -798,6 +800,9 @@ def main():
 		# wait for a short period
 		try:
 			sleep(.1)
+			count += 1
+			if (count % 10) == 0:
+				e.tk.event_generate("<<FOO>>", when="now")
 
 		# exit cleanly on break
 		except(KeyboardInterrupt):
