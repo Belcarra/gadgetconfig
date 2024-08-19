@@ -12,6 +12,7 @@ import sys
 import re
 import argparse
 from datetime import date
+import traceback
 
 try:
 	# from add import AddGadget
@@ -105,6 +106,13 @@ def main():
 		sys_config_path = "/sys/kernel/config/usb_gadget"
 
 	m = ManageGadget(sys_config_path, verbose=args.verbose, auto_serialnumber=args.auto_serialnumber)
+
+	udcs = m.find_udcs(verbose=True)
+	if not len(udcs):
+		print('Cannot find any UDCs', file=sys.stderr)
+		exit(1)
+	m.check_current(verbose=True)
+
 	if args.query_gadget:
 		print("Currently configured: %s" % (m.query_gadget_verbose()), file=sys.stderr)
 		exit(0)
@@ -135,8 +143,6 @@ def main():
 	#		exit(1)
 	#	os.makedirs("sys/kernel/config/usb_gadget")
 
-	# m.find_udcs(verbose=True)
-	# m.check_current(verbose=False)
 
 	if args.enable is not None:
 		m.enable_current(args.enable)

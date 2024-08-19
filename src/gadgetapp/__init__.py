@@ -21,6 +21,7 @@
 import os
 import sys
 import argparse
+import traceback
 
 # import fcntl
 # import signal
@@ -94,11 +95,19 @@ class watch:
         def __init__(self, realudcpath):
 
                 self.i = inotify.adapters.Inotify(block_duration_s=1)
-                self.realudcpath = realudcpath
-                self.udcstatepath = "%s/state" % realudcpath
+                try:
+                        self.realudcpath = realudcpath
+                        self.udcstatepath = "%s/state" % realudcpath
+                        self.i.add_watch(self.udcstatepath)
+                except Exception as e:
+                        print('Exception: %s for %s' % (e, self.udcstatepath), file=sys.stderr)
+                        print(traceback.format_exc(), file=sys.stderr)
 
-                self.i.add_watch(self.udcstatepath)
-                self.i.add_watch('/sys/kernel/config/usb_gadget')
+                try:
+                        self.i.add_watch('/sys/kernel/config/usb_gadget')
+                except Exception as e:
+                        print('Exception: %s' % (e, '/sys/kernel/config/usb_gadget'), file=sys.stderr)
+                        print(traceback.format_exc(), file=sys.stderr)
 
                 self.eventFlag = False
                 self.events = 0
@@ -776,7 +785,13 @@ def main():
         #m = ManageGadget(sys_config_path, auto_serialnumber=args.no_auto_serialnumber)
         m = ManageGadget(sys_config_path)
 
-        #print('realudcpath: %s' % (m.query_udc_path()))
+        udcs = m.find_udcs(False)
+        if not len(udcs):
+                print('Cannot find any UDCs', file=sys.stderr)
+                exit(1)
+
+        print('realudcpath: %s' % (m))
+        print('realudcpath: %s' % (m.query_udc_path()))
         w = watch(m.query_udc_path())
         w._start()
 

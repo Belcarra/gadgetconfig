@@ -11,6 +11,7 @@ import os
 import sys
 import hashlib
 import commentjson
+import traceback
 
 try:
 	from gadgetconfig.add import AddGadget
@@ -93,6 +94,7 @@ class ManageGadget(object):
 	def find_udcs(self, verbose=False):
 		links = os.listdir(self.udcpath)
 		self.udclist = []
+		self.vprint('find_udcs: links: %s' % (links))
 		for l in links:
 			fpath = "%s/%s" % (self.udcpath, l)
 			if os.path.islink(fpath):
@@ -168,9 +170,14 @@ class ManageGadget(object):
 	def query_udc_state(self):
 		#if self.device is None:
 		#	return "GADGET NOT CONFIGURED"
-		state_path = "%s/state" % (self.realudcpath)
-		state = self.pathread(state_path)
-		return state[0].rstrip()
+		try:
+			state_path = "%s/state" % (self.realudcpath)
+			state = self.pathread(state_path)
+			return state[0].rstrip()
+		except Exception as e:
+			print('Exception: %s realudcpath: %s' % (e, self.realudcpath), file=sys.stderr)
+			print(traceback.format_exc(), file=sys.stderr)
+			exit(1)
 
 		return
 
