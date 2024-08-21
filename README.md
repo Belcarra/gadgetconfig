@@ -30,6 +30,31 @@ If you have trouble getting it installed you can try:
 N.B. --no-binary is needed with recent versions of pip to cope with a bug.
 C.f.  https://stackoverflow.com/questions/40588634/how-to-install-data-files-to-absolute-path
 
+## Enable Gadget
+Add to /boot/config.txt or /boot/firmware/config.txt:
+```
+[pi5]
+dtoverlay=dwc2
+```
+Older:
+```
+[pi5]
+dtoverlay=dwc2
+```
+N.b. some installations may have "[cm5]" instead of "[pi5]". Change it.
+
+## Modules
+Add libcomposite to the */etc/modules* file:
+```
+# /etc/modules: kernel modules to load at boot time.
+#
+# This file contains the names of kernel modules that should be loaded
+# at boot time, one per line. Lines beginning with "#" are ignored.
+
+i2c-dev
+
+libcomposite
+```
 
 ## Gadget USB Device Overview
 

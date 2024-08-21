@@ -12,6 +12,7 @@ import sys
 import hashlib
 import commentjson
 import traceback
+import errno
 
 try:
 	from gadgetconfig.add import AddGadget
@@ -59,7 +60,7 @@ class ManageGadget(object):
 			return ''
 
 		# 4096 or 0 byte files should contain info
-		if fstat.st_size == 4096 or fstat.st_size == 0:
+		if fstat.st_size in [16384, 4096, 0]:
 			try:
 				f = open(path, "r")
 				lines = f.readlines(1000)
@@ -203,13 +204,19 @@ class ManageGadget(object):
 	# update UDC file to enable or disable a Gadget
 	def update_udc(self, name, s):
 		udcpath = "%s/%s/UDC" % (self.configpath, name)
-		# print("update_udc: %s" % (udcpath), file=sys.stderr)
+		print("update_udc: %s" % (udcpath), file=sys.stderr)
 		try:
 			f = open(udcpath, 'w')
 			f.write(s)
-			f.close()
+			#f.close()
+		except (errno.EBUSY):
+			print("update_udc: %s Resource Busy" % (udcpath), file=sys.stderr)
+			exit(1)
 		except (FileNotFoundError):
 			print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
+			exit(1)
+		except Exception as e:
+			print("update_udc: %s e: %s" % (udcpath, e), file=sys.stderr)
 			exit(1)
 
 	# write \n to UDC to disable a Gadget

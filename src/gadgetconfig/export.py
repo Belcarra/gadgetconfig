@@ -34,6 +34,7 @@ import sys
 import collections
 import fnmatch
 import re
+import traceback
 
 """gadget.py: ..."""
 
@@ -334,8 +335,14 @@ class ExportGadget(object):
 				device['functions'] = self.export_device_functions(epath)
 			if 'configs' in device_entries:
 				epath = "%s/%s" % (device_path, 'configs')
-				device['# Gadget Configurations list'] = ''
-				device['configs'] = self.export_device_configs(epath, device['idVendor'], device['idProduct'])
+				print('device: %s' % (device), file=sys.stderr)
+				try:
+					device['# Gadget Configurations list'] = ''
+					device['configs'] = self.export_device_configs(epath, device['idVendor'], device['idProduct'])
+				except Exception as e:
+					print('Exception: %s device: %s' % (e, device), file=sys.stderr)
+					print(traceback.format_exc(), file=sys.stderr)
+					exit(1)
 			for entry in device_entries:
 				# print("export_device: device_path: %s entry: %s" % (device_path, entry), file=sys.stderr)
 				epath = "%s/%s" % (device_path, entry)
