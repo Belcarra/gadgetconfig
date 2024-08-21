@@ -204,7 +204,6 @@ class ManageGadget(object):
 	# update UDC file to enable or disable a Gadget
 	def update_udc(self, name, s):
 		udcpath = "%s/%s/UDC" % (self.configpath, name)
-		print("update_udc: %s" % (udcpath), file=sys.stderr)
 		try:
 			f = open(udcpath, 'w')
 			f.write(s)
