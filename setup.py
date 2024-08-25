@@ -1,54 +1,41 @@
+from setuptools import setup, find_packages
 
-from setuptools import setup
+# Read the contents of your README file
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
-
-def main():
-
-    setup(
-        name='gadgetconfig',
-        packages=['gadgetconfig', 'gadgetapp'],
-        package_dir={'': 'src'},
-        version=open('VERSION.txt').read().strip(),
-        author='Stuart Lynne',
-        author_email='stuart.lynne@belcarra.com',
-        url='http://github.com/Belcarra/gadgetconfig',
-        download_url='http://github.com/Belcarra/gadgetconfig.git',
-        license='MIT',
-        keywords=['usb', 'gadget'],
-        description='gadgetconfig creates and controls Gadget USB Devices and integrates Gadget with systemd',
-        entry_points={'console_scripts': ['gadgetconfig = gadgetconfig:main', 'gadgetapp = gadgetapp:main' ], },
-        install_requires=["argparse", "commentjson", "prettyjson", "scandir", "inotify", "termcolor", "python-magic", "sysfstree", "gadgetconfig"],
-        classifiers=[
-            "Programming Language :: Python",
-            "Development Status :: 3 - Alpha",
-            "Environment :: Console",
-            "Intended Audience :: Developers",
-            "Intended Audience :: System Administrators",
-            "Operating System :: POSIX",
-            "License :: OSI Approved :: MIT License",
-            "Natural Language :: English",
-            "Topic :: System :: System Shells",
-            "Topic :: System :: Systems Administration",
+setup(
+    name="gadgetconfig",  # Replace with your project's name
+    version=open('VERSION.txt').read().strip(),
+    author="Stuart Lynne",
+    author_email="stuart.lynne@gmail.com",
+    description="Command line and GUI Gadget Config for Raspberry Pi",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/myproject",  # Replace with your project's URL
+    packages=find_packages(),  # Automatically find all packages and sub-packages
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",  # Replace with your chosen license
+        "Operating System :: OS Independent",
+    ],
+    python_requires='>=3.6',  # Specify your Python version requirement
+    install_requires=[
+        "argparse",
+        "commentjson",
+        "prettyjson",
+        "scandir",
+        "inotify",
+        "termcolor",
+        "python-magic",
+        "gadgetconfig"
+    ],
+    entry_points={
+        'console_scripts': [
+            'gadgetconfig = gadgetconfig.gadgetconfig.gadgetconfig:main',
+            'gadgetapp = gadgetconfig.gadgetapp.gadgetapp:main',
+            'sysfstree = gadgetconfig.sysfstree.sysfstree:main',
         ],
-        include_package_data=True,
-        data_files=[
-            ('/etc/systemd/system/getty@ttyGS0.service.d', ['service/override.conf']),
-            ('/etc/systemd/system/getty@ttyGS1.service.d', ['service/override.conf']),
-            ('/etc/gadgetservice', [
-                    'definitions/belcarra-acm-ecm.json',
-                    'definitions/belcarra-acm-eem.json',
-                    'definitions/belcarra-acm.json',
-                    'definitions/belcarra-acm-rndis.json',
-                    'definitions/belcarra-eem-acm.json']),
-            ('/usr/lib/gadgetservice', ['service/gadget.start', 'service/gadget.stop']),
-            ('/lib/systemd/system', ['service/gadget.service']),
-            ('/usr/share/doc/gadgetconfig', ['README.md', 'docs/README-Gadget.md', 'docs/README-Raspbian.md']), ],
+    },
+)
 
-        long_description=open('README.md').read(),
-        long_description_content_type='text/markdown'
-
-    )
-
-
-if __name__ == '__main__':
-    main()

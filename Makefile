@@ -15,12 +15,13 @@ bdist:
 	python3 setup.py $@
 sdist:
 	python3 setup.py $@
-#install:
-#	python3 setup.py $@
 install:
-	pip3 install --no-binary :all: --upgrade .
+	@pip3 install --no-binary :all: --upgrade . || /bin/echo -e "\n****\nTo install without venv use: make install_with_break\n"
+install_with_break:
+	pip3 install --no-binary :all: --upgrade --break-system-packages .
+
 uninstall:
-	pip3 uninstall gadgetconfig
+	pip3 uninstall --yes gadgetconfig --break-system-packages
 
 twine:
 	twine upload dist/*
