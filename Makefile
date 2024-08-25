@@ -21,6 +21,8 @@ install_with_break:
 	pip3 install --no-binary :all: --upgrade --break-system-packages .
 
 uninstall:
+	pip3 uninstall --yes gadgetconfig
+uninstall_with_break:
 	pip3 uninstall --yes gadgetconfig --break-system-packages
 
 twine:
