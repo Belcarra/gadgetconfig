@@ -232,7 +232,7 @@ class Tabs:
                 if self.currentID == 1:
                        for s in os.listdir("/sys/class/udc"):
                             udcpath = os.path.realpath('/sys/class/udc/%s' % (s))
-                            print("udc: s: %s" % (udcpath, ), file=sys.stderr)
+                            #print("udc: s: %s" % (udcpath, ), file=sys.stderr)
                             #_main2([os.path.realpath("/sys/class/udc/%s" % (s))], maxlevel=args.maxlevel)
                             s = sysfs([udcpath], -1, 
                                 #include=["*.usb", ["udc"], [], ["soft_connect", "function", "maximum_speed", "state", "uevent"]],
