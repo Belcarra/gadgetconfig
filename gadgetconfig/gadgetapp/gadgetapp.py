@@ -806,8 +806,8 @@ def main():
                 print('Cannot find any UDCs', file=sys.stderr)
                 exit(1)
 
-        print('realudcpath: %s' % (m))
-        print('realudcpath: %s' % (m.query_udc_path()))
+        #print('realudcpath: %s' % (m))
+        #print('realudcpath: %s' % (m.query_udc_path()))
         w = watch(m.query_udc_path())
         w._start()
 
