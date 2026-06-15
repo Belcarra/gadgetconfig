@@ -35,6 +35,7 @@ import collections
 import fnmatch
 import re
 import traceback
+import stat
 
 """gadget.py: ..."""
 
@@ -46,7 +47,6 @@ class ExportGadget(object):
 	def __init__(self, configpath, verbose=False):
 		self.configpath = configpath
 		self.verbose = verbose
-		self.verbose = True
 		# device['# E.g.: usb_f_acm, usb_f_ecm, usb_f_eem, usb_f_hid, usb_f_mass_storage'] = ''
 		# device['#       usb_f_midi, usb_f_ncm, usb_f_obex, usb_f_rndis, usb_f_serial'] = ''
 		self.interfaces = {'acm': 2, 'ecm': 2, 'eem': 1, 'ncm': 2, 'hid': 1, 'mass_storage': 1, 'rndis': 1, 'serial': 2}
@@ -64,8 +64,15 @@ class ExportGadget(object):
 			print("pathread: %s NOT FOUND" % (path), file=sys.stderr)
 			return ''
 
-		# 4096 or 0 byte files should contain info
-		if fstat.st_size == 4096 or fstat.st_size == 0:
+		# configfs/sysfs attribute files report one kernel page as their size.
+		# Do not hard-code 4096: Raspberry Pi 5 kernels commonly use 16K pages.
+		try:
+			page_size = os.sysconf('SC_PAGESIZE')
+		except (ValueError, OSError, AttributeError):
+			page_size = 4096
+
+		# Page-sized, smaller, or 0 byte files should contain attribute info.
+		if stat.S_ISREG(fstat.st_mode) and (fstat.st_size == 0 or fstat.st_size <= page_size):
 			try:
 				f = open(path, "r")
 				lines = f.readlines(1000)
@@ -335,7 +342,8 @@ class ExportGadget(object):
 				device['functions'] = self.export_device_functions(epath)
 			if 'configs' in device_entries:
 				epath = "%s/%s" % (device_path, 'configs')
-				print('device: %s' % (device), file=sys.stderr)
+				if self.verbose:
+					print('device: %s' % (device), file=sys.stderr)
 				try:
 					device['# Gadget Configurations list'] = ''
 					device['configs'] = self.export_device_configs(epath, device['idVendor'], device['idProduct'])
