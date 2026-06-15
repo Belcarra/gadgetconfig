@@ -10,7 +10,6 @@ import io
 import os
 import sys
 import hashlib
-import commentjson
 import traceback
 import errno
 
@@ -46,6 +45,15 @@ class ManageGadget(object):
 	def vprint(self, s):
 		if self.verbose:
 			print(s, file=sys.stderr)
+
+	def load_commentjson(self):
+		try:
+			import commentjson
+			return commentjson
+		except ImportError:
+			print("ImportError: please install python3-commentjson package!", file=sys.stderr)
+			print("Typically this will be: apt install python3-commentjson", file=sys.stderr)
+			exit(1)
 
 	def pathread(self, path):
 
@@ -270,7 +278,7 @@ class ManageGadget(object):
 	def get_device_name(self, pathname, device_name=None, args=None):
 		with io.open(pathname) as f:
 			try:
-				device_definitions = commentjson.load(f)
+				device_definitions = self.load_commentjson().load(f)
 			# except (UnexpectedCharacters):
 			except:
 				print("get_device_name: Unexpected Characters")
@@ -289,7 +297,7 @@ class ManageGadget(object):
 			print("check_device_file: File Not Found Error", file=sys.stderr)
 			exit(1)
 		try:
-			device_definitions = commentjson.load(f)
+			device_definitions = self.load_commentjson().load(f)
 		# except (UnexpectedCharacters):
 		except:
 			print("check_device_file: Unexpected Characters")
@@ -321,7 +329,7 @@ class ManageGadget(object):
 			self.vprint("add_device_file: File Not Found Error")
 			exit(1)
 		try:
-			device_definitions = commentjson.load(f)
+			device_definitions = self.load_commentjson().load(f)
 		# except (UnexpectedCharacters):
 		except:
 			self.vprint("add_device_file: Unexpected Characters")
@@ -370,4 +378,3 @@ class ManageGadget(object):
 					pass
 
 			a.add_device_json(device_definition, device_name=device_name)
-

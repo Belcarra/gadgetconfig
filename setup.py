@@ -23,16 +23,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',  # Specify your Python version requirement
-    install_requires=[
-        "argparse",
-        "commentjson",
-        "prettyjson",
-        "scandir",
-        "inotify",
-        "termcolor",
-        "python-magic",
-        "gadgetconfig"
-    ],
+    # Keep the base install offline-friendly. Optional runtime helpers such as
+    # commentjson, inotify, termcolor, and python-magic can be supplied by the
+    # distro packages on Raspberry Pi systems.
+    install_requires=[],
     entry_points={
         'console_scripts': [
             'gadgetconfig = gadgetconfig.gadgetconfig.gadgetconfig:main',
