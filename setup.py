@@ -1,12 +1,14 @@
 from setuptools import setup, find_packages
 
+from VERSION import VERSION
+
 # Read the contents of your README file
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="gadgetconfig",  # Replace with your project's name
-    version=open('VERSION.txt').read().strip(),
+    version=VERSION,
     author="Stuart Lynne",
     author_email="stuart.lynne@gmail.com",
     description="Command line and GUI Gadget Config for Raspberry Pi",
@@ -14,6 +16,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/myproject",  # Replace with your project's URL
     packages=find_packages(),  # Automatically find all packages and sub-packages
+    py_modules=["VERSION"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",  # Replace with your chosen license
@@ -38,4 +41,3 @@ setup(
         ],
     },
 )
-

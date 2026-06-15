@@ -11,25 +11,19 @@ import sys
 # import io
 import re
 import argparse
+import importlib.util
+from pathlib import Path
 from datetime import date
 import traceback
 
-try:
-	# from gadgetconfig.add import AddGadget
-	from gadgetconfig.gadgetconfig.export import ExportGadget
-	from gadgetconfig.gadgetconfig.manage import ManageGadget
-	from gadgetconfig.gadgetconfig.remove import RemoveGadget
-	from gadgetconfig.gadgetconfig.prettyjson import prettyjson
-#except Exception as e:
-#	print('Import error: %s' % (e), file=sys.stderr)
-#	print(traceback.format_exc(), file=sys.stderr)
-#	exit(1)
-except (ImportError):
-	# from add import AddGadget
-	from export import ExportGadget
-	from manage import ManageGadget
-	from remove import RemoveGadget
-	from prettyjson import prettyjson
+def load_version():
+	version_path = Path(__file__).resolve().parents[2] / "VERSION.py"
+	spec = importlib.util.spec_from_file_location("gadgetconfig_version", version_path)
+	module = importlib.util.module_from_spec(spec)
+	spec.loader.exec_module(module)
+	return module.VERSION
+
+VERSION = load_version()
 
 
 """gadgetconfig.py: ..."""
@@ -44,6 +38,8 @@ def main():
 		usage='%(prog)s [command][options]',
 		description="Configure Gadget Device using SysFS and ConfigFS",
 		formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=999))
+
+	parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
 
 	# parser.add_argument("-L", "--conf", nargs='?', help="include (shell pattern match)", default='')
 	# parser.add_argument("paths", metavar='Path', type=str, nargs=argparse.REMAINDER, help="pathname", default=[])
@@ -100,6 +96,17 @@ def main():
 	parser.add_argument("--verbose", action='store_true')
 
 	args = parser.parse_args()
+
+	try:
+		from gadgetconfig.gadgetconfig.export import ExportGadget
+		from gadgetconfig.gadgetconfig.manage import ManageGadget
+		from gadgetconfig.gadgetconfig.remove import RemoveGadget
+		from gadgetconfig.gadgetconfig.prettyjson import prettyjson
+	except (ImportError):
+		from export import ExportGadget
+		from manage import ManageGadget
+		from remove import RemoveGadget
+		from prettyjson import prettyjson
 
 	# print("args: %s" % (args), file=sys.stderr)
 	# print("", file=sys.stderr)
