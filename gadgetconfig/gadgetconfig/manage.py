@@ -216,9 +216,11 @@ class ManageGadget(object):
 			f = open(udcpath, 'w')
 			f.write(s)
 			#f.close()
-		except (errno.EBUSY):
-			print("update_udc: %s Resource Busy" % (udcpath), file=sys.stderr)
-			exit(1)
+		except OSError as e:
+			if e.errno == errno.EBUSY:
+				print("update_udc: %s Resource Busy" % (udcpath), file=sys.stderr)
+				exit(1)
+			raise
 		except (FileNotFoundError):
 			print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
 			exit(1)
