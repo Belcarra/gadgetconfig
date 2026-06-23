@@ -63,6 +63,32 @@ except :
         from remove import RemoveGadget
 
 
+def ensure_root():
+        if os.getuid() != 0:
+                print("Re-launching script with sudo privileges...", file=sys.stderr)
+                os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
+
+
+def detach_from_shell():
+        try:
+                pid = os.fork()
+        except OSError as e:
+                print("Unable to detach from shell: %s" % (e), file=sys.stderr)
+                return
+
+        if pid > 0:
+                os._exit(0)
+
+        os.setsid()
+
+        with open(os.devnull, "rb", buffering=0) as stdin:
+                os.dup2(stdin.fileno(), sys.stdin.fileno())
+        with open(os.devnull, "ab", buffering=0) as stdout:
+                os.dup2(stdout.fileno(), sys.stdout.fileno())
+        with open(os.devnull, "ab", buffering=0) as stderr:
+                os.dup2(stderr.fileno(), sys.stderr.fileno())
+
+
 def sysfs(paths, maxlevel=-1, pinclude=[], pexclude=[], include=[], exclude=[], bold=[], sort=True):
         # print("_main: bold: %s" % (bold))
         s = ''
@@ -794,6 +820,9 @@ def main():
         parser.add_argument("--no_auto_serialnumber", action='store_false', help="Disable auto_serialnumber mode")
 
         args = parser.parse_args()
+
+        ensure_root()
+        detach_from_shell()
 
         #print('location: %s' % (args.location))
 
