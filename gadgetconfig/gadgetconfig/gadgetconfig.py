@@ -89,6 +89,7 @@ def main():
 
 	parser.add_argument("--dev_addr", type=str, help="Optional ecm dev_addr attribute")
 	parser.add_argument("--host_addr", type=str, help="Optional ecm host_addr attribute")
+	parser.add_argument("--qmult", type=str, help="Optional USB networking qmult attribute")
 
 	parser.add_argument("--name", nargs='?', type=str, help='device name override', default=None)
 	# parser.add_argument("-I", "--id", nargs='?', type=int, help='enable ID', default=1)

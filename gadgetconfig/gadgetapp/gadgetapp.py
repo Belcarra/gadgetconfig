@@ -90,6 +90,16 @@ def dhcpcd(interface_name):
         result = subprocess.run(['ifconfig', interface_name, ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         return result.stdout
 
+def usb_interfaces():
+        names = []
+        try:
+                for name in sorted(os.listdir('/sys/class/net')):
+                        if fnmatch.fnmatch(name, 'usb[0-9]*'):
+                                names.append(name)
+        except FileNotFoundError:
+                pass
+        return names
+
 # watch
 # start a process to watch for changes in /sys, set a flag if anything changes
 #
@@ -177,11 +187,11 @@ class Tabs:
                 self.nb.pack(expand=1, fill='both')
                 self.nb.bind("<Button-3>", self.nbFoo)
 
-                self.tab_names = ["Gadget", "UDC State", "Systemd", "usb0", ]
+                self.tab_names = ["Gadget", "UDC State", "Systemd"]
+                self.tab_names.extend(usb_interfaces())
+                self.tab_names.extend(sorted(self.m.query_gadgets(), key=str.casefold, reverse=False))
                 for n in self.tab_names:
                         self.add_tab(n)
-
-                self.nb_update_tablist()
 
         def nbFoo(self, event):
                 #print("nbFoo: %s " % (event), file=sys.stderr)
@@ -207,21 +217,6 @@ class Tabs:
                         self.nb.add(newTabFrame)
                 self.nb.tab(id, text=name)
                 newTabFrame.bind("<<NotebookTabChanged>>", self.tab_test)
-
-        def nb_update_tablist(self):
-                gadgets = self.m.query_gadgets()
-                # print("*************************************************", file=sys.stderr)
-                # print("nb_update_tablist: gadgets: %s" % (gadgets), file=sys.stderr)
-                # print(self.nb.tabs(), file=sys.stderr)
-                # print("nb_update_tablist: nameIDs: %s" % (self.nameIDs), file=sys.stderr)
-                # print("nb_update_tablist: tabIDs: %s" % (self.tabIDs), file=sys.stderr)
-                # print("---", file=sys.stderr)
-                for g in gadgets:
-                        if g in self.nameIDs:
-                                # print("nb_update_tablist: %s already in nameIDs" % (g), file=sys.stderr)
-                                continue
-                        # print("nb_update_tablist: %s ADD", (g), file=sys.stderr)
-                        self.add_tab(g)
 
         def nb_test(self, event=None):
                 self.currentID = event.widget.index('current')
@@ -260,10 +255,12 @@ class Tabs:
                                         #include=[[], ["UDC", "idVendor", "idProduct"], ['strings'], ['0x409'], ['manufacturer']])
                 elif self.currentID == 2:
                         s = systemctl('gadget')
-                elif self.currentID == 3:
-                        s = dhcpcd('usb0')
                 else:
-                        s = sysfs(["/sys/kernel/config/usb_gadget/%s" % (self.tabIDs[self.currentID])], -1, sort=True)
+                        tab_name = self.tabIDs[self.currentID]
+                        if fnmatch.fnmatch(tab_name, 'usb[0-9]*'):
+                                s = dhcpcd(tab_name)
+                        else:
+                                s = sysfs(["/sys/kernel/config/usb_gadget/%s" % (tab_name)], -1, sort=True)
 
                 text = self.textlist[self.currentID]
                 text.delete('1.0', END)
@@ -294,6 +291,9 @@ class Editor:
                 self.no_def_str = '<empty>'
                 self.location = location
                 self.auto_serialnumber = auto_serialnumber
+                self.last_gadgets = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+                self.last_enabled_gadget = self.m.query_gadget()
+                self.last_usb_ifaces = usb_interfaces()
 
         def onevent(self, event):
                 #print("onevent: %s" % (event))
@@ -404,7 +404,22 @@ class Editor:
 
         def update(self, selection=None, msg="", event=False):
                 #print("update: %s" % (msg))
+                current_gadgets = sorted(self.m.query_gadgets(), key=str.casefold, reverse=False)
+                current_enabled = self.m.query_gadget()
+                current_usb_ifaces = usb_interfaces()
+                gadget_set_changed = (current_gadgets != self.last_gadgets)
+                enabled_changed = (current_enabled != self.last_enabled_gadget)
+                usb_set_changed = (current_usb_ifaces != self.last_usb_ifaces)
+
+                if gadget_set_changed or usb_set_changed:
+                        self.last_gadgets = current_gadgets
+                        self.last_usb_ifaces = current_usb_ifaces
+                        self.notebook()
+                self.last_enabled_gadget = current_enabled
+
                 if not event:
+                        self.gadget_definitions_spinbox(selection=selection)
+                elif gadget_set_changed or enabled_changed or usb_set_changed:
                         self.gadget_definitions_spinbox(selection=selection)
                 # print("Editor:update", file=sys.stderr)
                 # sleep(1)
@@ -552,8 +567,15 @@ class Editor:
                         self.update(selection=None, msg="gadget_enable_button_pressed query_gadget NONE")
                         return
 
+                selection = self.gadget_spinbox.get().strip()
+                if selection == self.no_def_str or not self.m.check_device_name(selection):
+                        messagebox.showerror(title="Error", message="Select or add a defined gadget profile first")
+                        self.update(selection=None, msg="gadget_enable_button_pressed no gadget definition")
+                        return
+
                 # print("gadget_enable_button_pressed: gadget selection: %s" % (self.gadget_spinbox.get().strip()), file=sys.stderr)
-                self.m.enable_current(self.gadget_spinbox.get().strip())
+                if not self.m.enable_current(selection):
+                        messagebox.showerror(title="Error", message="Unable to enable gadget \"%s\"" % (selection))
                 #self.gadget_enable_button_set()
                 #self.udc_button_set()
                 self.update(selection=None, msg="gadget_enable_button_pressed")
@@ -680,11 +702,16 @@ class Editor:
         def gadget_remove_button_pressed(self):
                 if (self.gadget_spinbox is None):
                         return
-                if self.gadget_spinbox.get().strip() == self.m.query_gadget():
+                selection = self.gadget_spinbox.get().strip()
+                if selection == self.no_def_str or not self.m.check_device_name(selection):
+                        messagebox.showerror(title="Error", message="Select a defined gadget profile first")
+                        self.update(selection=None, msg="gadget_remove_button_pressed missing definition")
+                        return
+                if selection == self.m.query_gadget():
                         messagebox.showerror(title="Error", message="Disable %s first" % (self.m.query_gadget()))
                         return
                 r = RemoveGadget(self.m.configpath, self.m)
-                r.remove_device(self.gadget_spinbox.get().strip())
+                r.remove_device(selection)
                 #self.gadget_spinbox_postcommand()
                 #self.gadget_definitions_spinbox()
                 #self.gadget_spinbox_update(None, "REMOVE")

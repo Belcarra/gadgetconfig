@@ -219,14 +219,15 @@ class ManageGadget(object):
 		except OSError as e:
 			if e.errno == errno.EBUSY:
 				print("update_udc: %s Resource Busy" % (udcpath), file=sys.stderr)
-				exit(1)
+				return False
+			if e.errno == errno.ENOENT:
+				print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
+				return False
 			raise
-		except (FileNotFoundError):
-			print("update_udc: %s File Not Found Error" % (udcpath), file=sys.stderr)
-			exit(1)
 		except Exception as e:
 			print("update_udc: %s e: %s" % (udcpath, e), file=sys.stderr)
-			exit(1)
+			return False
+		return True
 
 	# write \n to UDC to disable a Gadget
 	def disable_current(self):
@@ -235,17 +236,19 @@ class ManageGadget(object):
 			return False
 
 		# print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
-		self.update_udc(self.query_gadget(), "\n")
-		return True
+		return self.update_udc(self.query_gadget(), "\n")
 
 	# write UDC driver name to UDC to enable a Gadget
 	def enable_current(self, name):
 		if not self.query_gadget() is None:
 			# print("enable_current: UDC is attached! %s" % (self.query_gadget()), file=sys.stderr)
 			return False
+		if not self.check_device_name(name):
+			print("enable_current: Gadget %s is not defined" % (name), file=sys.stderr)
+			return False
 
 		# print("Gadget UDC configured to USB Device %s" % (self.query_gadget_verbose()), file=sys.stderr)
-		self.update_udc(name, self.udclist[0])
+		return self.update_udc(name, self.udclist[0])
 
 	def soft_connect(self, flag):
 		# print("soft_connect: %s" % (['disconnect', 'connect'][flag]), file=sys.stderr)
@@ -355,6 +358,7 @@ class ManageGadget(object):
 				if args.serialnumber: self.replace(device_definition, 'serialnumber', args.serialnumber)
 				if args.dev_addr: self.replace(device_definition, 'dev_addr', args.dev_addr)
 				if args.host_addr: self.replace(device_definition, 'host_addr', args.host_addr)
+				if args.qmult: self.replace(device_definition, 'qmult', args.qmult)
 
 			if self.auto_serialnumber or auto_serialnumber:
 				serialnumber_path = "/proc/device-tree/serial-number"
