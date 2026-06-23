@@ -7,6 +7,7 @@
 #
 
 import sys
+import os
 
 # import io
 import re
@@ -29,6 +30,24 @@ VERSION = load_version()
 """gadgetconfig.py: ..."""
 
 # __author__  = "Stuart.Lynne@belcarra.com"
+
+
+def ensure_root():
+	if os.getuid() != 0:
+		print("Re-launching script with sudo privileges...", file=sys.stderr)
+		os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
+
+
+def needs_root(args):
+	return (
+		args.add is not None or
+		args.enable is not None or
+		args.disable or
+		args.soft_connect or
+		args.soft_disconnect or
+		args.remove is not None or
+		args.remove_all
+	)
 
 
 # this is mainly for testing standalone
@@ -97,6 +116,9 @@ def main():
 	parser.add_argument("--verbose", action='store_true')
 
 	args = parser.parse_args()
+
+	if needs_root(args):
+		ensure_root()
 
 	try:
 		from gadgetconfig.gadgetconfig.export import ExportGadget
