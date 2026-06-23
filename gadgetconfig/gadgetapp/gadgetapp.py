@@ -66,7 +66,7 @@ except :
 def ensure_root():
         if os.getuid() != 0:
                 print("Re-launching script with sudo privileges...", file=sys.stderr)
-                os.execvp("sudo", ["sudo", sys.executable] + sys.argv)
+                os.execvp("sudo", ["sudo", "-E", sys.executable] + sys.argv)
 
 
 def detach_from_shell():
