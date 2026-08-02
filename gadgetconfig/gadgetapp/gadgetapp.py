@@ -21,6 +21,8 @@
 import os
 import sys
 import argparse
+import importlib.util
+from pathlib import Path
 import traceback
 
 # import fcntl
@@ -63,30 +65,72 @@ except :
         from remove import RemoveGadget
 
 
+def load_version():
+        version_path = Path(__file__).resolve().parents[2] / "VERSION.py"
+        spec = importlib.util.spec_from_file_location("gadgetconfig_version", version_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.VERSION
+
+
+VERSION = load_version()
+LOG_PATH = "/run/gadgetapp.log"
+
+
+def log_startup(message):
+        line = "gadgetapp: %s" % (message)
+        print(line, file=sys.stderr, flush=True)
+        try:
+                with open(LOG_PATH, "a") as f:
+                        print(line, file=f, flush=True)
+        except OSError:
+                pass
+
+
+def log_display_environment():
+        log_startup("display environment DISPLAY=%s XAUTHORITY=%s XDG_RUNTIME_DIR=%s" % (
+                os.environ.get("DISPLAY", ""),
+                os.environ.get("XAUTHORITY", ""),
+                os.environ.get("XDG_RUNTIME_DIR", ""),
+        ))
+
+
 def ensure_root():
         if os.getuid() != 0:
-                print("Re-launching script with sudo privileges...", file=sys.stderr)
-                os.execvp("sudo", ["sudo", "-E", sys.executable] + sys.argv)
+                log_startup("not running as root; re-launching with sudo")
+                xauth_path = os.environ.get("XAUTHORITY") or os.path.expanduser("~/.Xauthority")
+                os.execvp("sudo", [
+                        "sudo",
+                        "-E",
+                        "XAUTHORITY=%s" % (xauth_path),
+                        sys.executable,
+                ] + sys.argv)
+        log_startup("running as root with pid %s" % (os.getpid()))
 
 
 def detach_from_shell():
+        log_startup("detaching from calling shell")
         try:
                 pid = os.fork()
         except OSError as e:
-                print("Unable to detach from shell: %s" % (e), file=sys.stderr)
-                return
+                log_startup("unable to detach from shell: %s" % (e))
+                return False
 
         if pid > 0:
+                log_startup("detached child pid %s; parent exiting" % (pid))
                 os._exit(0)
 
         os.setsid()
+        log_startup("detached child running as pid %s" % (os.getpid()))
+        log_startup("continuing diagnostics in %s" % (LOG_PATH))
 
         with open(os.devnull, "rb", buffering=0) as stdin:
                 os.dup2(stdin.fileno(), sys.stdin.fileno())
         with open(os.devnull, "ab", buffering=0) as stdout:
                 os.dup2(stdout.fileno(), sys.stdout.fileno())
-        with open(os.devnull, "ab", buffering=0) as stderr:
+        with open(LOG_PATH, "ab", buffering=0) as stderr:
                 os.dup2(stderr.fileno(), sys.stderr.fileno())
+        return True
 
 
 def sysfs(paths, maxlevel=-1, pinclude=[], pexclude=[], include=[], exclude=[], bold=[], sort=True):
@@ -843,16 +887,27 @@ def main():
                 description="GUI Configure Gadget Device using SysFS and ConfigFS",
                 formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=999))
 
+        parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
         parser.add_argument("--location", type=str, help="Optional window location +x+y")
         parser.add_argument("--no_auto_serialnumber", action='store_false', help="Disable auto_serialnumber mode")
 
         args = parser.parse_args()
 
         ensure_root()
+        log_display_environment()
         detach_from_shell()
 
-        #print('location: %s' % (args.location))
+        try:
+                return run_app(args)
+        except Exception:
+                print("gadgetapp: fatal error during startup or main loop", file=sys.stderr, flush=True)
+                print(traceback.format_exc(), file=sys.stderr, flush=True)
+                return 1
 
+
+def run_app(args):
+        #print('location: %s' % (args.location))
+        log_startup("initializing gadget UI")
         sys_config_path = "/sys/kernel/config/usb_gadget"
         #m = ManageGadget(sys_config_path, auto_serialnumber=args.no_auto_serialnumber)
         m = ManageGadget(sys_config_path)
@@ -860,7 +915,7 @@ def main():
         udcs = m.find_udcs(False)
         if not len(udcs):
                 print('Cannot find any UDCs', file=sys.stderr)
-                exit(1)
+                return 1
 
         #print('realudcpath: %s' % (m))
         #print('realudcpath: %s' % (m.query_udc_path()))
@@ -869,6 +924,7 @@ def main():
 
         e = Editor(manage=m, location=args.location, auto_serialnumber=args.no_auto_serialnumber)
         e.tk()
+        log_startup("tkinter UI initialized")
 
         # replacement for tk.mainloop() 
         # This is slightly painful, tk.update() needs to be in main process,
@@ -900,7 +956,9 @@ def main():
                         e.event()
 
         w.stop()
+        log_startup("exiting")
+        return 0
 
 
 if __name__ == '__main__':
-        main()
+        raise SystemExit(main())

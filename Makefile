@@ -16,14 +16,14 @@ bdist:
 sdist:
 	python3 setup.py $@
 install:
-	@pip3 install --no-binary :all: --upgrade . || /bin/echo -e "\n****\nTo install without venv use: make install_with_break\n"
+	@sudo -H pip3 install --no-user --no-binary :all: --upgrade . || /bin/echo -e "\n****\nTo install without venv use: make install_with_break\n"
 install_with_break:
-	pip3 install --no-binary :all: --upgrade --break-system-packages .
+	sudo -H pip3 install --no-user --no-binary :all: --upgrade --break-system-packages .
 
 uninstall:
-	pip3 uninstall --yes gadgetconfig
+	sudo -H pip3 uninstall --yes gadgetconfig
 uninstall_with_break:
-	pip3 uninstall --yes gadgetconfig --break-system-packages
+	sudo -H pip3 uninstall --yes gadgetconfig --break-system-packages
 
 twine:
 	twine upload dist/*
@@ -55,5 +55,3 @@ gadget_modules.tgz:
 sysfs.tgz:
 	cd /; tar cvfz /tmp/$@ \
 		mv /tmp/$@ .
-
-

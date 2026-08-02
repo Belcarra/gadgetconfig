@@ -27,10 +27,16 @@ setup(
     # commentjson, inotify, termcolor, and python-magic can be supplied by the
     # distro packages on Raspberry Pi systems.
     install_requires=[],
+    extras_require={
+        'mcp': [
+            'mcp>=1.28.1,<2',
+        ],
+    },
     entry_points={
         'console_scripts': [
             'gadgetconfig = gadgetconfig.gadgetconfig.gadgetconfig:main',
             'gadgetapp = gadgetconfig.gadgetapp.gadgetapp:main',
+            'pigadget-mcp = gadgetconfig.pigadget_mcp.server:main',
             'sysfstree = gadgetconfig.sysfstree.sysfstree:main',
         ],
     },
